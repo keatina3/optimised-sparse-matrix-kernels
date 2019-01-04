@@ -11,15 +11,15 @@ typedef char header[4];
 typedef int bool;
 typedef struct
 {
-	FILE* file;
-	header head;
-	dim m;
-	dim n;
+	FILE 	*file;
+	header	head;
+	dim		m;
+	dim 	n;
 	unsigned long nz;
-	real **arr;
-	real* dat;
-	dim* I;
-	dim* J;
+	real 	**arr;
+	real	*dat;
+	dim		*I;
+	dim		*J;
 }
 mat_mar;
 
@@ -53,7 +53,6 @@ double* lsolve(mat_mar mat);
 #define is_general(header)		((header)[3]=='G')
 #define is_skew(header)			((header)[3]=='K')
 #define is_hermitian(header)	((header)[3]=='H')
-
 
 
 
