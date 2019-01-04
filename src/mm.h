@@ -11,12 +11,12 @@ typedef char header[4];
 typedef int bool;
 typedef struct
 {
-	FILE 	*file;
+	FILE	*file;
 	header	head;
 	dim		m;
-	dim 	n;
+	dim		n;
 	unsigned long nz;
-	real 	**arr;
+	real	**arr;
 	real	*dat;
 	dim		*I;
 	dim		*J;
