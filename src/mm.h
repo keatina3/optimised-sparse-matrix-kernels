@@ -5,23 +5,23 @@
 #define MatrixMarketBanner "%%MatrixMarket"
 #define MM_MAX_TOKEN_LENGTH 64
 
-typedef dim unsigned long
-typedef real double
-typedef header char[4]
-typedef bool int;
+typedef unsigned long dim;
+typedef double real;
+typedef char header[4];
+typedef int bool;
 typedef struct
 {
 	FILE* file;
 	header head;
 	dim m;
 	dim n;
-	unsigned long long nz;
+	unsigned long nz;
 	real **arr;
 	real* dat;
-	real* I;
-	real* J;
-};
-mat_mar
+	dim* I;
+	dim* J;
+}
+mat_mar;
 
 
 
@@ -67,7 +67,7 @@ double* lsolve(mat_mar mat);
 #define INT		"integer"
 
 #define GENERAL	"general"
-#define SYM		"symmetric"
+#define SYMM	"symmetric"
 #define HERMIT	"hermitian"
 #define SKEW	"skew-symmetric"
 #define PATT	"pattern"
