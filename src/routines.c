@@ -7,7 +7,7 @@ bool lsolve(mat_mar L, real* b){
 	
 	for(i=0;i<L.m;i++){
 		b[i] /= L.dat[L.J[i]];
-		for(j = L.J[i]+1; j < L.J[i+1]; p++)
+		for(j = L.J[i]+1; j < L.J[i+1]; j++)
 			b[L.I[j]] -= L.dat[j] * b[i];
 	}
 	return 1;

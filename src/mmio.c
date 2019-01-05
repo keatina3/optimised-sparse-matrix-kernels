@@ -86,12 +86,16 @@ bool read_mm_size(mat_mar A){
 			return 0;
 	}	while(buffer[0] == '%');
 
-	if(A.head[1]=='C')
-		if(sscanf(buffer, "%lu %lu %lu", &A.m, &A.n, &A.nz) == 3)
+	if(A.head[1]=='C'){
+		if(sscanf(buffer, "%lu %lu %lu", &A.m, &A.n, &A.nz) == 3){
 			return 0;
-	else
-		if(sscanf(buffer, "%lu %lu", &A.m, &A.n) == 2)
+		}
+	} else{
+		if(sscanf(buffer, "%lu %lu", &A.m, &A.n) == 2){
 			return 0;
+		}
+	}
+	return 1;
 }
 
 bool read_mm_data(mat_mar A){
@@ -103,7 +107,8 @@ bool read_mm_data(mat_mar A){
 }
 
 bool read_CCS(mat_mar A){
-	dim i, tmp1,tmp2, count1 = 0, count2 = 0;
+	dim i,tmp1,tmp2;
+	dim count1 = 0, count2 = 0;
 
 	A.dat = (real *) malloc(A.nz*sizeof(real));
 	A.I = (dim *) malloc(A.nz*sizeof(dim));
@@ -112,11 +117,12 @@ bool read_CCS(mat_mar A){
 	for (i=0; i<A.nz; i++){
 		fscanf(A.file, "%lu %lu %lf\n", &A.I[i], &tmp1, &A.dat[i]);
 		A.I[i]--;
-		count1++;
 		if(tmp1 != tmp2){
 			A.J[count2] = count1;
 			count2++;
+			tmp2 = tmp1;
 		}
+		count1++;
 	}
 	A.J[A.n] = A.nz;
 	return 0;
@@ -125,18 +131,17 @@ bool read_CCS(mat_mar A){
 bool read_arr(mat_mar A){
 	dim i,j;
 
-	A.dat = (real *) malloc(A.m * A.n  * sizeof(real))
+	A.dat = (real *) malloc(A.m * A.n  * sizeof(real));
 	A.arr = (real **)malloc(A.m * sizeof(real*));
-	for(i=0;i<m;i++){
-		A.arr[i] = &A.dat[i*n]; 
-		for(j=0;j<n;j++){
-			if (!fscanf(A.file, "%lf", &arr[i][j])) 
+	for(i=0;i<A.m;i++){
+		A.arr[i] = &A.dat[i*A.n]; 
+		for(j=0;j<A.n;j++){
+			if (!fscanf(A.file, "%lf", &A.arr[i][j])) 
         		break;		
 		}
 	}
 
-
-	return 0
+	return 0;
 }
 
 mat_mar init_mat(char* file){
