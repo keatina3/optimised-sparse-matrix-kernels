@@ -15,11 +15,9 @@ bool read_mm_head(mat_mar* A){
 
 	if(fgets(buffer, MM_MAX_LINE_LENGTH, A->file) == NULL) 
 		return 0;
-	printf("%s",buffer);
 	
 	if(sscanf(buffer, "%s %s %s %s %s", banner, mtx, crd, data_type, storage_scheme) != 5)
 		return 0;
-	printf("%s %s %s %s %s\n", banner, mtx, crd, data_type, storage_scheme);
 
 	for(ptr=mtx; *ptr!='\0'; *ptr=tolower(*ptr),ptr++);  /* convert to lower case */
 	for(ptr=crd; *ptr!='\0'; *ptr=tolower(*ptr),ptr++);  
@@ -29,13 +27,10 @@ bool read_mm_head(mat_mar* A){
     /* check for banner */
 	if(strncmp(banner, MatrixMarketBanner, strlen(MatrixMarketBanner)) != 0)
 		return 0;
-	printf("%s,%s\n",mtx,MATRIX);
-	printf("%d\n",strcmp(mtx,MATRIX));
     /* first field should be "mtx" */
 	if(strcmp(mtx, MATRIX) != 0)
 		return  0;
 	A->head[0]='M';
-	printf("%c\n",A->head[0]);
 
     /* second field describes whether this is a sparse matrix (in coordinate
             storgae) or a dense array */
@@ -76,7 +71,6 @@ bool read_mm_head(mat_mar* A){
 	else
 		return 0;
     
-	printf("%c%c%c%c\n",A->head[0],A->head[1],A->head[2],A->head[3]);
 	return 1;
 }
 
@@ -90,17 +84,16 @@ bool read_mm_size(mat_mar* A){
 		if(fgets(buffer,MM_MAX_LINE_LENGTH,A->file) == NULL) 
 			return 0;
 	}	while(buffer[0] == '%');
-
 	if(A->head[1]=='C'){
 		if(sscanf(buffer, "%lu %lu %lu", &A->m, &A->n, &A->nz) == 3){
-			return 0;
+			return 1;
 		}
 	} else{
 		if(sscanf(buffer, "%lu %lu", &A->m, &A->n) == 2){
-			return 0;
+			return 1;
 		}
 	}
-	return 1;
+	return 0;
 }
 
 bool read_mm_data(mat_mar* A){
@@ -117,7 +110,7 @@ bool read_CCS(mat_mar* A){
 
 	A->dat = (real *) malloc((A->nz)*sizeof(real));
 	A->I = (dim *) malloc((A->nz)*sizeof(dim));
-	A->J = (dim *) malloc(( (A->n) +1)*sizeof(dim));
+	A->J = (dim *) malloc(((A->n) +1)*sizeof(dim));
 
 	for (i=0; i<(A->nz); i++){
 		fscanf(A->file, "%lu %lu %lf\n", &(A->I)[i], &tmp1, &(A->dat)[i]);
@@ -155,26 +148,83 @@ mat_mar init_mat(char* file){
 	A.file = fopen(file,"r");
 	
 	if(A.file == NULL)
-		printf("Could not open file %s",file);
-	else
-		printf("file opened succesfully\n");
-	
+		printf("\nCould not open file %s\n\n",file);
+	else{
+		printf("\nFile opened succesfully:\n");
+		printf("%s\n\n",file);
+	}
 	if(!read_mm_head(&A))
-		printf("Error getting header\n");
-	printf("%s\n",A.head);
-	
+		printf("Error getting header!\n");
 	if(!read_mm_size(&A))
-		printf("Error getting size\n");
+		printf("Error getting size!\n");
 	if(!read_mm_data(&A))
-		printf("Error reading data\n");
+		printf("Error reading data!\n");
+	
+	printf("Matrix type: %c%c%c%c\n",A.head[0],A.head[1],A.head[2],A.head[3]);
+	printf("Dimensions: %lu, %lu\n",A.m,A.n);
+	printf("Non-zero elements: %lu\n\n\n",A.nz);
 	
 	fclose(A.file);
 	return A;
 }
 
+bool CCSvectoArr(mat_mar* b, real* x){
+	dim i;
+	
+	//x = (real*)calloc(b->m,sizeof(real));
+	for(i=0;i<b->nz;i++)
+		x[b->I[i]] = b->dat[i];
+	//free(b->dat);
+	//b->dat=x;
+	return 0;
+}
+
+mat_mar getLvals(mat_mar* A){
+	dim count = 0;
+	dim i,j;
+	mat_mar L;
+
+	for(i=0;i<A->n;i++)
+		for(j = (A->J)[i]; j < (A->J)[i+1]; j++)
+			if( A->I[j] >= i)
+				count++;
+	
+	for(i=0;i<4;i++)
+		L.head[i] = A->head[i];
+	L.m = A->m;
+	L.n = A->n;
+	L.nz = count;
+	L.dat = (real*)malloc(count*sizeof(real));
+	L.I = (dim*)malloc(count*sizeof(dim));
+	L.J = (dim*)malloc(((L.m)+1)*sizeof(dim));
+	
+	count = 0;
+	for(i=0;i<L.n;i++){
+		L.J[i] = count;
+		for(j = (A->J)[i]; j < (A->J)[i+1]; j++){
+			if( A->I[j] >= i){
+				L.dat[count] = A->dat[j];
+				L.I[count] = A->I[j];
+				count++;
+			}
+		}
+	}
+	L.J[L.n] = L.nz;
+
+	printf("\nRemoved upper triangular elements from A.\nNow left with matrix L\n\n");
+	printf("Matrix type: %c%c%c%c\n",L.head[0],L.head[1],L.head[2],L.head[3]);
+	printf("Dimensions: %lu, %lu\n",L.m,L.n);
+	printf("Non-zero elements: %lu\n\n\n",L.nz);
+	
+	return L;
+}
+
 void free_mat(mat_mar* A){
 	free(A->dat);
-	free(A->I);
-	free(A->J);
-	free(A->arr);
+	if(is_sparse(A->head)){
+		free(A->I);
+		free(A->J);
+	}
+	else
+		free(A->arr);
 }

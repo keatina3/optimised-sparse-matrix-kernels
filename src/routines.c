@@ -4,24 +4,14 @@
 
 bool lsolve(mat_mar* L, real* b){
 	dim i, j;
-	
+	if(!L->J || !L->I || !b)
+		return 0;
 	for(i=0;i<L->m;i++){
 		b[i] /= L->dat[L->J[i]];
 		for(j = L->J[i]+1; j < L->J[i+1]; j++)
 			b[L->I[j]] -= L->dat[j] * b[i];
 	}
 	return 1;
-}
-
-real* CCSvectoArr(mat_mar* b){
-	real* x;
-	dim i;
-	
-	x = (real*)calloc(b->m,sizeof(real));
-	for(i=0;i<b->nz;i++)
-		x[b->I[i]] = b->dat[i];
-
-	return x;
 }
 
 /*
