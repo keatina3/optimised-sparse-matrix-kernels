@@ -97,9 +97,8 @@ bool read_mm_size(mat_mar Mat){
 bool read_mm_data(mat_mar Mat){
 	if(is_real(Mat.head) && is_sparse(Mat.head))
 		read_CCS(Mat);
-	else
-		return 0;
-		//read_array_format
+	else if(is_real(Mat.head) && is_dense(Mat.head))
+		read_arr(Mat);
 	return 0;
 }
 
@@ -121,6 +120,23 @@ bool read_CCS(mat_mar Mat){
 	}
 	Mat.J[Mat.n] = Mat.nz;
 	return 0;
+}
+
+bool read_arr(mat_mar Mat){
+	dim i,j;
+
+	Mat.dat = (real *) malloc(Mat.m * Mat.n  * sizeof(real))
+	Mat.arr = (real **)malloc(Mat.m * sizeof(real*));
+	for(i=0;i<m;i++){
+		Mat.arr[i] = &Mat.dat[i*n]; 
+		for(j=0;j<n;j++){
+			if (!fscanf(Mat.file, "%lf", &arr[i][j])) 
+        		break;		
+		}
+	}
+
+
+	return 0
 }
 
 mat_mar init_mat(char* file){
