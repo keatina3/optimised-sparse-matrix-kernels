@@ -26,15 +26,15 @@ mat_mar;
 
 
 
-bool read_mm_head(mat_mar mat);
-bool read_mm_size(mat_mar mat);
-bool read_mm_data(mat_mar mat);
-bool read_CCS(mat_mar mat);
-bool read_arr(mat_mar mat);
+bool read_mm_head(mat_mar A);
+bool read_mm_size(mat_mar A);
+bool read_mm_data(mat_mar A);
+bool read_CCS(mat_mar A);
+bool read_arr(mat_mar A);
 mat_mar init_mat(char* file);
 
-double* lsolve(mat_mar mat);
-
+bool lsolve(mat_mar L, real* b);
+real* CCSvectoArr(mat_mar b);
 
 
 

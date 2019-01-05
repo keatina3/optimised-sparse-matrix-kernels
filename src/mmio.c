@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include "mm.h"
 
-bool read_mm_head(mat_mar Mat){
+bool read_mm_head(mat_mar A){
 	char buffer[MM_MAX_LINE_LENGTH];
 	char banner[MM_MAX_TOKEN_LENGTH];
 	char mtx[MM_MAX_TOKEN_LENGTH]; 
@@ -13,7 +13,7 @@ bool read_mm_head(mat_mar Mat){
 	char storage_scheme[MM_MAX_TOKEN_LENGTH];
 	char *ptr;
 
-	if(fgets(buffer, MM_MAX_LINE_LENGTH, Mat.file) == NULL) 
+	if(fgets(buffer, MM_MAX_LINE_LENGTH, A.file) == NULL) 
 		return 0;
 
 	if(sscanf(buffer, "%s %s %s %s %s", banner, mtx, crd, data_type, storage_scheme) != 5)
@@ -31,16 +31,16 @@ bool read_mm_head(mat_mar Mat){
     /* first field should be "mtx" */
 	if(strcmp(mtx, MATRIX) != 0)
 		return  0;
-	Mat.head[0]='M';
+	A.head[0]='M';
 
     /* second field describes whether this is a sparse matrix (in coordinate
             storgae) or a dense array */
 
 
 	if(strcmp(crd, SPARSE) == 0)
-		Mat.head[1]='C';
+		A.head[1]='C';
 	else if (strcmp(crd, DENSE) == 0)
-		Mat.head[1]='A';
+		A.head[1]='A';
 	else
 		return 0;
     
@@ -48,13 +48,13 @@ bool read_mm_head(mat_mar Mat){
     /* third field */
 
 	if(strcmp(data_type, REAL) == 0)
-		Mat.head[2]='R';
+		A.head[2]='R';
 	else if(strcmp(data_type, COMPLEX) == 0)
-		Mat.head[2]='C';
+		A.head[2]='C';
 	else if(strcmp(data_type, PATT) == 0)
-		Mat.head[2]='P';
+		A.head[2]='P';
 	else if(strcmp(data_type, INT) == 0)
-		Mat.head[2]='I';
+		A.head[2]='I';
 	else
 		return 0;
     
@@ -62,75 +62,75 @@ bool read_mm_head(mat_mar Mat){
     /* fourth field */
 
 	if(strcmp(storage_scheme, GENERAL) == 0)
-		Mat.head[3]='G';
+		A.head[3]='G';
 	else if(strcmp(storage_scheme, SYMM) == 0)
-		Mat.head[3]='S';
+		A.head[3]='S';
 	else if(strcmp(storage_scheme, HERMIT) == 0)
-		Mat.head[3]='H';
+		A.head[3]='H';
 	else if(strcmp(storage_scheme, SKEW) == 0)
-		Mat.head[3]='K';
+		A.head[3]='K';
 	else
 		return 0;
         
 	return 0;
 }
 
-bool read_mm_size(mat_mar Mat){
+bool read_mm_size(mat_mar A){
 	char buffer[MM_MAX_LINE_LENGTH];
 	
-	if(!Mat.head)
-		read_mm_head(Mat);
+	if(!A.head)
+		read_mm_head(A);
 
 	do	{
-		if(fgets(buffer,MM_MAX_LINE_LENGTH,Mat.file) == NULL) 
+		if(fgets(buffer,MM_MAX_LINE_LENGTH,A.file) == NULL) 
 			return 0;
 	}	while(buffer[0] == '%');
 
-	if(Mat.head[1]=='C')
-		if(sscanf(buffer, "%lu %lu %lu", &Mat.m, &Mat.n, &Mat.nz) == 3)
+	if(A.head[1]=='C')
+		if(sscanf(buffer, "%lu %lu %lu", &A.m, &A.n, &A.nz) == 3)
 			return 0;
 	else
-		if(sscanf(buffer, "%lu %lu", &Mat.m, &Mat.n) == 2)
+		if(sscanf(buffer, "%lu %lu", &A.m, &A.n) == 2)
 			return 0;
 }
 
-bool read_mm_data(mat_mar Mat){
-	if(is_real(Mat.head) && is_sparse(Mat.head))
-		read_CCS(Mat);
-	else if(is_real(Mat.head) && is_dense(Mat.head))
-		read_arr(Mat);
+bool read_mm_data(mat_mar A){
+	if(is_real(A.head) && is_sparse(A.head))
+		read_CCS(A);
+	else if(is_real(A.head) && is_dense(A.head))
+		read_arr(A);
 	return 0;
 }
 
-bool read_CCS(mat_mar Mat){
+bool read_CCS(mat_mar A){
 	dim i, tmp1,tmp2, count1 = 0, count2 = 0;
 
-	Mat.dat = (real *) malloc(Mat.nz*sizeof(real));
-	Mat.I = (dim *) malloc(Mat.nz*sizeof(dim));
-	Mat.J = (dim *) malloc(((Mat.n)+1)*sizeof(dim));
+	A.dat = (real *) malloc(A.nz*sizeof(real));
+	A.I = (dim *) malloc(A.nz*sizeof(dim));
+	A.J = (dim *) malloc(((A.n)+1)*sizeof(dim));
 
-	for (i=0; i<Mat.nz; i++){
-		fscanf(Mat.file, "%lu %lu %lf\n", &Mat.I[i], &tmp1, &Mat.dat[i]);
-		Mat.I[i]--;
+	for (i=0; i<A.nz; i++){
+		fscanf(A.file, "%lu %lu %lf\n", &A.I[i], &tmp1, &A.dat[i]);
+		A.I[i]--;
 		count1++;
 		if(tmp1 != tmp2){
-			Mat.J[count2] = count1;
+			A.J[count2] = count1;
 			count2++;
 		}
 	}
-	Mat.J[Mat.n] = Mat.nz;
+	A.J[A.n] = A.nz;
 	return 0;
 }
 
-bool read_arr(mat_mar Mat){
+bool read_arr(mat_mar A){
 	dim i,j;
 
-	Mat.dat = (real *) malloc(Mat.m * Mat.n  * sizeof(real))
-	Mat.arr = (real **)malloc(Mat.m * sizeof(real*));
+	A.dat = (real *) malloc(A.m * A.n  * sizeof(real))
+	A.arr = (real **)malloc(A.m * sizeof(real*));
 	for(i=0;i<m;i++){
-		Mat.arr[i] = &Mat.dat[i*n]; 
+		A.arr[i] = &A.dat[i*n]; 
 		for(j=0;j<n;j++){
-			if (!fscanf(Mat.file, "%lf", &arr[i][j])) 
+			if (!fscanf(A.file, "%lf", &arr[i][j])) 
         		break;		
 		}
 	}
@@ -140,26 +140,26 @@ bool read_arr(mat_mar Mat){
 }
 
 mat_mar init_mat(char* file){
-	mat_mar Mat;
+	mat_mar A;
 
-	Mat.file = fopen(file,"r");
+	A.file = fopen(file,"r");
 	
-	if(Mat.file == NULL)
+	if(A.file == NULL)
 		printf("Could not open file %s",file);
 
-	if(!read_mm_head(Mat))
+	if(!read_mm_head(A))
 		printf("Error");
-	if(!read_mm_size(Mat))
+	if(!read_mm_size(A))
 		printf("Error");
-	if(!read_mm_data(Mat))
+	if(!read_mm_data(A))
 		printf("Error");
 	
-	return Mat;
+	return A;
 }
 
-void free_mat(mat_mar Mat){
-	free(Mat.dat);
-	free(Mat.I);
-	free(Mat.J);
-	free(Mat.arr);
+void free_mat(mat_mar A){
+	free(A.dat);
+	free(A.I);
+	free(A.J);
+	free(A.arr);
 }
