@@ -7,12 +7,12 @@
 
 typedef unsigned long dim;
 typedef double real;
-typedef char header[4];
+typedef char header;
 typedef int bool;
 typedef struct
 {
 	FILE	*file;
-	header	head;
+	header	head[4];
 	dim		m;
 	dim		n;
 	unsigned long nz;
@@ -26,15 +26,16 @@ mat_mar;
 
 
 
-bool read_mm_head(mat_mar A);
-bool read_mm_size(mat_mar A);
-bool read_mm_data(mat_mar A);
-bool read_CCS(mat_mar A);
-bool read_arr(mat_mar A);
+bool read_mm_head(mat_mar* A);
+bool read_mm_size(mat_mar* A);
+bool read_mm_data(mat_mar* A);
+bool read_CCS(mat_mar* A);
+bool read_arr(mat_mar* A);
 mat_mar init_mat(char* file);
+void free_mar(mat_mar* A);
 
-bool lsolve(mat_mar L, real* b);
-real* CCSvectoArr(mat_mar b);
+bool lsolve(mat_mar* L, real* b);
+real* CCSvectoArr(mat_mar* b);
 
 
 

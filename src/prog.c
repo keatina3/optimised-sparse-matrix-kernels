@@ -7,6 +7,7 @@ int main(int argc, char* argv[]){
 	mat_mar A;
 
 	A = init_mat(address);
-	printf("Dimensions of A: %lu,%lu,%lu",A.m,A.n,A.nz);	
+	printf("%c%c%c%c\n",A.head[0],A.head[1],A.head[2],A.head[3]);
+	printf("Dimensions of A: %lu,%lu,%lu\n",A.m,A.n,A.nz);	
 	return 0;
 }
