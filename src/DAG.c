@@ -25,8 +25,9 @@ Graph* createGraph(dim n){
 		//err_exit("Unable to allocate memory for graph");
 
 	graph->num_vertices = n;
-
-    /* Create an array of adjacency lists*/
+	graph->visited = (bool*)calloc(graph->num_vertices,sizeof(bool));
+    
+	/* Create an array of adjacency lists*/
 	graph->adjListArr = (adj_list*)malloc(n * sizeof(adj_list));
 	if(!graph->adjListArr)
 	    printf("Error allocating list array for DAG");
@@ -55,7 +56,8 @@ void freeGraph(Graph* graph){
 				}
         	}
         	/*Free the adjacency list array*/
-        	free(graph->adjListArr);
+        	free(graph->visited);
+			free(graph->adjListArr);
         }
         /*Free the graph*/
 		free(graph);
@@ -91,9 +93,8 @@ void displayGraph(Graph* graph){
 }
 
 void DFS(Graph* graph,dim vertex) {
-	node* adjList = graph->adjListArr[vertex].head;
-    node* temp = adjList;
-	graph->visited = (bool*)calloc(graph->num_vertices,sizeof(bool));
+	adj_list adjList = graph->adjListArr[vertex];
+    node* temp = adjList.head;
     graph->visited[vertex] = 1;
     //printf("Visited %d \n", vertex);
 

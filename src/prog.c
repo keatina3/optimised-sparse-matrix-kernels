@@ -30,10 +30,36 @@ int main(int argc, char* argv[]){
 	for(i=0;i<L.n;i++)
 		for(j= L.J[i]; j < L.J[i+1]; j++)
 			addEdge(DG, i, L.I[j]);
+	
+	/*
+	Graph* DG = createGraph(10);
+    addEdge(DG, 0, 6);
+    addEdge(DG, 0, 9);
+    addEdge(DG, 1, 2);
+    addEdge(DG, 1, 5);
+    addEdge(DG, 2, 8);
+    addEdge(DG, 2, 5);
+    addEdge(DG, 3, 4);
+    addEdge(DG, 3, 5);
+    addEdge(DG, 3, 8);
+    addEdge(DG, 4, 5);
+    addEdge(DG, 4, 8);
+    addEdge(DG, 5, 7);
+    addEdge(DG, 6, 7);
+    addEdge(DG, 7, 8);
+    addEdge(DG, 7, 9);
+    addEdge(DG, 8, 9);
 
-    //printf("\nDIRECTED GRAPH\n");
-    //displayGraph(DG);
-    
+    printf("\nDIRECTED GRAPH\n");
+    displayGraph(DG);
+	
+	DFS(DG, 0);
+	DFS(DG, 5);
+	for(i=0;i<10;i++){
+		printf("visited: %d, vertex: %ld\n",DG->visited[i],i+1);
+	}
+	*/
+
 	freeGraph(DG);
 	free_mat(&A);
 	free_mat(&b);
