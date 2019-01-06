@@ -7,15 +7,15 @@
 
 typedef unsigned long dim;
 typedef double real;
-typedef char header;
 typedef int bool;
+typedef char header;
 typedef struct
 {
 	FILE	*file;
 	header	head[4];
 	dim		m;
 	dim		n;
-	unsigned long nz;
+	dim		nz;
 	real	**arr;
 	real	*dat;
 	dim		*I;

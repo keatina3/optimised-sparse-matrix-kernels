@@ -26,7 +26,7 @@ int main(int argc, char* argv[]){
 
 	lsolve(&L, x);
 	
-    Graph* DG = createGraph(L.n);
+	Graph* DG = createGraph(L.n);
 	for(i=0;i<L.n;i++)
 		for(j= L.J[i]; j < L.J[i+1]; j++)
 			addEdge(DG, i, L.I[j]);

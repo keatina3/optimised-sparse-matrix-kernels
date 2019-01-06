@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "mm.h"
 #include "DAG.h"
 
 /* Function to create an adjacency list node*/
-node* createNode(int v){
+node* createNode(dim v){
 	node* newNode = (node*)malloc(sizeof(node));
 	if(!newNode)
 	    printf("Error creating node\n");
@@ -16,8 +17,8 @@ node* createNode(int v){
 }
 
 /* Function to create a graph with n vertices; Creates both directed and undirected graphs*/
-Graph* createGraph(int n){
-	int i;
+Graph* createGraph(dim n){
+	dim i;
 	Graph* graph = (Graph*)malloc(sizeof(Graph));
 	if(!graph)
 		printf("Error allocating DAG.\n");
@@ -43,7 +44,7 @@ Graph* createGraph(int n){
 void freeGraph(Graph* graph){
 	if(graph){
 	    if(graph->adjListArr){
-			int v;
+			dim v;
         	/*Free up the nodes*/
         	for (v = 0; v < graph->num_vertices; v++){
         		node* adjListPtr = graph->adjListArr[v].head;
@@ -62,7 +63,7 @@ void freeGraph(Graph* graph){
 }
 
 /* Adds an edge to a graph*/
-void addEdge(Graph* graph, int src, int dest){
+void addEdge(Graph* graph, dim src, dim dest){
     /* Add an edge from src to dst in the adjacency list*/
 	if(src==dest)
 		return;
@@ -75,16 +76,32 @@ void addEdge(Graph* graph, int src, int dest){
 
 /* Function to print the adjacency list of graph*/
 void displayGraph(Graph* graph){
-    int i;
+    dim i;
     for (i = 0; i < graph->num_vertices; i++)
     {
         node* adjListPtr = graph->adjListArr[i].head;
-        printf("\n%d: ", i);
+        printf("\n%lu: ", i);
         while (adjListPtr)
         {
             printf("%d->", adjListPtr->vertex);
             adjListPtr = adjListPtr->next;
         }
         printf("NULL\n");
+    }
+}
+
+void DFS(Graph* graph,dim vertex) {
+	node* adjList = graph->adjListArr[vertex].head;
+    node* temp = adjList;
+	graph->visited = (bool*)calloc(graph->num_vertices,sizeof(bool));
+    graph->visited[vertex] = 1;
+    //printf("Visited %d \n", vertex);
+
+    while(temp!=NULL) {
+        dim connectedVertex = temp->vertex;
+        if(graph->visited[connectedVertex] == 0) {
+            DFS(graph, connectedVertex);
+        }
+        temp = temp->next;
     }
 }

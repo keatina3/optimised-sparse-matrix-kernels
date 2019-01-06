@@ -22,15 +22,16 @@ adj_list;
 typedef struct Graph
 {
 	int num_vertices;         /*Number of vertices*/
-	int* visited;
+	bool* visited;
 	adj_list* adjListArr;     /*Adjacency lists' array*/
 }
 Graph;
 
-node* createNode(int v);
-Graph* createGraph(int n);
+node* createNode(dim v);
+Graph* createGraph(dim n);
 void freeGraph(Graph* graph);
-void addEdge(Graph* graph, int src, int dest);
+void addEdge(Graph* graph, dim src, dim dest);
 void displayGraph(Graph* graph);
+void DFS(Graph* graph, dim vertex);
 
 #endif
