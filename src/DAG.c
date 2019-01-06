@@ -7,9 +7,8 @@
 node* createNode(int v){
 	node* newNode = (node*)malloc(sizeof(node));
 	if(!newNode)
-	    printf("Error creating node\n");
-		//err_exit("Unable to allocate memory for new node");
-
+		printf("Error creating node\n");
+		
 	newNode->vertex = v;
 	newNode->next = NULL;
 
@@ -22,16 +21,15 @@ Graph* createGraph(int n){
 	Graph* graph = (Graph*)malloc(sizeof(Graph));
 	if(!graph)
 		printf("Error allocating DAG.\n");
-		//err_exit("Unable to allocate memory for graph");
-
+	
 	graph->num_vertices = n;
 	graph->visited = (bool*)calloc(graph->num_vertices,sizeof(bool));
-    graph->reach.head = NULL;
-    graph->reach.tail = graph->reach.head;
+	graph->reach.head = NULL;
+	graph->reach.tail = graph->reach.head;
 	/* Create an array of adjacency lists*/
 	graph->adjListArr = (adj_list*)malloc(n * sizeof(adj_list));
 	if(!graph->adjListArr)
-	    printf("Error allocating list array for DAG");
+		printf("Error allocating list array for DAG");
 		//err_exit("Unable to allocate memory for adjacency list array");
 
 	for(i = 0; i < n; i++){
@@ -45,7 +43,7 @@ Graph* createGraph(int n){
 /*Destroys the graph*/
 void freeGraph(Graph* graph){
 	if(graph){
-	    if(graph->adjListArr){
+		if(graph->adjListArr){
 			int v;
         	/*Free up the nodes*/
         	for (v = 0; v < graph->num_vertices; v++){
@@ -59,8 +57,8 @@ void freeGraph(Graph* graph){
         	/*Free the adjacency list array*/
         	free(graph->visited);
 			free(graph->adjListArr);
-        }
-        /*Free the graph*/
+    	}
+    	/*Free the graph*/
 		free(graph);
 	}
 }
@@ -95,18 +93,19 @@ void addEdge(Graph* graph, int src, dim dest){
 	graph->adjListArr[src].tail = newNode;
 }
 */
+
 /* Function to print the adjacency list of graph*/
 void displayGraph(Graph* graph){
-    int i;
-    for (i = 0; i < graph->num_vertices; i++){
-        node* adjListPtr = graph->adjListArr[i].head;
-        printf("\n%u: ", i);
-        while (adjListPtr){
-            printf("%d->", adjListPtr->vertex);
-            adjListPtr = adjListPtr->next;
-        }
-        printf("NULL\n");
-    }
+	int i;
+	for (i = 0; i < graph->num_vertices; i++){
+    	node* adjListPtr = graph->adjListArr[i].head;
+    	printf("\n%u: ", i);
+    	while (adjListPtr){
+        	printf("%d->", adjListPtr->vertex);
+        	adjListPtr = adjListPtr->next;
+    	}
+    	printf("NULL\n");
+	}
 }
 
 void DFS(Graph* graph, int vertex) {
@@ -120,22 +119,22 @@ void DFS(Graph* graph, int vertex) {
 	while(temp!=NULL){
 		int edge = temp->vertex;
     	if(graph->visited[edge] == 0){
-        	DFS(graph, edge);
+    		DFS(graph, edge);
     	}
     	temp = temp->next;
 	}
 }
 
 void appendReach(Graph* graph, int vertex){
-    node* newNode = createNode(vertex);
-    node* old = graph->reach.tail;
+	node* newNode = createNode(vertex);
+	node* old = graph->reach.tail;
     
-    if(graph->reach.head == NULL){
-        graph->reach.head = newNode;
-        old = graph->reach.head;
-    }
+	if(graph->reach.head == NULL){
+    	graph->reach.head = newNode;
+    	old = graph->reach.head;
+	}
 
-    newNode->next = NULL;
-    old->next = newNode;
+	newNode->next = NULL;
+	old->next = newNode;
 	graph->reach.tail = newNode;
 }
