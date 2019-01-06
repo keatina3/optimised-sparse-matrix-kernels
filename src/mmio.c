@@ -169,12 +169,8 @@ mat_mar init_mat(char* file){
 
 bool CCSvectoArr(mat_mar* b, real* x){
 	dim i;
-	
-	//x = (real*)calloc(b->m,sizeof(real));
 	for(i=0;i<b->nz;i++)
 		x[b->I[i]] = b->dat[i];
-	//free(b->dat);
-	//b->dat=x;
 	return 1;
 }
 

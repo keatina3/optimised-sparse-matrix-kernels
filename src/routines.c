@@ -3,23 +3,19 @@
 #include "mm.h"
 #include "DAG.h"
 #include "routines.h"
-#include "DAG.h"
 
 real* lsolve(mat_mar* L, mat_mar* b){
 	dim i, j;
 	real* x;
-	if(!L->J || !L->I || !b)
+	if(!L || !b)
 		return NULL;
 	
-	if(is_sparse(b->head)){
-		x = (real*)calloc(b->m,sizeof(real));
-		CCSvectoArr(b,x);
-	} else
-		x = b->dat;
+	x = (real*)calloc(b->m,sizeof(real));
+	CCSvectoArr(b,x);
 
 	for(i=0;i<L->m;i++){
 		x[i] /= L->dat[L->J[i]];
-		for(j = L->J[i]+1; j < L->J[i+1]; j++)
+		for(j = (L->J[i])+1; j < L->J[i+1]; j++)
 			x[L->I[j]] -= L->dat[j] * x[i];
 	}
 	return x;
@@ -28,25 +24,25 @@ real* lsolve(mat_mar* L, mat_mar* b){
 real* lsolve_GP(mat_mar* L, mat_mar* b, Graph* graph){
 	dim i, j;
 	real* x;
-	if(!L->J || !L->I || !b)
+	if(!L || !b)
 		return NULL;
 	
-	if(is_sparse(b->head)){
-		x = (real*)calloc(b->m,sizeof(real));
-		CCSvectoArr(b,x);
-	} else
-		x = b->dat;
+	x = (real*)calloc(b->m,sizeof(real));
+	CCSvectoArr(b,x);
 	
 	for(i=0;i<b->nz;i++)
 		DFS(graph,b->I[i]);
-
+	int count = 0;
 	node* tmp = graph->reach.head;
 	while(tmp!=NULL){
+		count++;
 		i = tmp->vertex;
+		//printf("R[i] = %lu\n",i);
 		x[i] /= L->dat[L->J[i]];
 		for(j = L->J[i]+1; j < L->J[i+1]; j++)
 			x[L->I[j]] -= L->dat[j] * x[i];
 		tmp = tmp->next;
 	}
+	printf("Count = %d\n",count);
 	return x;
 }
