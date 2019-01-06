@@ -14,6 +14,7 @@ typedef struct adj_list
 {
 	int num_elems;			/*number of members in the list (for future use)*/
 	node *head;					/*head of the adjacency linked list*/
+	node *tail;
 }
 adj_list;
 
@@ -23,15 +24,17 @@ typedef struct Graph
 {
 	int num_vertices;         /*Number of vertices*/
 	bool* visited;
+	adj_list reach;
 	adj_list* adjListArr;     /*Adjacency lists' array*/
 }
 Graph;
 
-node* createNode(dim v);
-Graph* createGraph(dim n);
+node* createNode(int v);
+Graph* createGraph(int n);
 void freeGraph(Graph* graph);
-void addEdge(Graph* graph, dim src, dim dest);
+void addEdge(Graph* graph, int src, int dest);
 void displayGraph(Graph* graph);
-void DFS(Graph* graph, dim vertex);
+void DFS(Graph* graph, int vertex);
+void appendReach(Graph* graph, int vertex);
 
 #endif

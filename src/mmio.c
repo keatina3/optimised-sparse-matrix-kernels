@@ -135,11 +135,10 @@ bool read_arr(mat_mar* A){
 		A->arr[i] = &(A->dat[i*(A->n)]); 
 		for(j=0;j<(A->n);j++){
 			if (!fscanf(A->file, "%lf", &A->arr[i][j])) 
-        		break;		
+        		return 0;		
 		}
 	}
-
-	return 0;
+	return 1;
 }
 
 mat_mar init_mat(char* file){
@@ -176,7 +175,7 @@ bool CCSvectoArr(mat_mar* b, real* x){
 		x[b->I[i]] = b->dat[i];
 	//free(b->dat);
 	//b->dat=x;
-	return 0;
+	return 1;
 }
 
 mat_mar getLvals(mat_mar* A){
