@@ -3,31 +3,50 @@
 #include "mm.h"
 #include "DAG.h"
 #include "routines.h"
+#include "DAG.h"
 
-bool lsolve(mat_mar* L, real* b){
+real* lsolve(mat_mar* L, mat_mar* b){
 	dim i, j;
+	real* x;
 	if(!L->J || !L->I || !b)
-		return 0;
+		return NULL;
+	
+	if(is_sparse(b->head)){
+		x = (real*)calloc(b->m,sizeof(real));
+		CCSvectoArr(b,x);
+	} else
+		x = b->dat;
+
 	for(i=0;i<L->m;i++){
-		b[i] /= L->dat[L->J[i]];
+		x[i] /= L->dat[L->J[i]];
 		for(j = L->J[i]+1; j < L->J[i+1]; j++)
-			b[L->I[j]] -= L->dat[j] * b[i];
+			x[L->I[j]] -= L->dat[j] * x[i];
 	}
-	return 1;
+	return x;
 }
 
-/*
-int lsolve (int n, int* Lp, int* Li, double* Lx, double *x){
-int p, j;
-if (!Lp || !Li || !x) return (0) ;  //check inputs 
-for (j = 0 ; j < n ; j++)
-{
-x [j] /= Lx [Lp [j]] ;
-for (p = Lp [j]+1 ; p < Lp [j+1] ; p++)
-{
-x [Li [p]] -= Lx [p] * x [j] ;
+real* lsolve_GP(mat_mar* L, mat_mar* b, Graph* graph){
+	dim i, j;
+	real* x;
+	if(!L->J || !L->I || !b)
+		return NULL;
+	
+	if(is_sparse(b->head)){
+		x = (real*)calloc(b->m,sizeof(real));
+		CCSvectoArr(b,x);
+	} else
+		x = b->dat;
+	
+	for(i=0;i<b->nz;i++)
+		DFS(graph,b->I[i]);
+
+	node* tmp = graph->reach.head;
+	while(tmp!=NULL){
+		i = tmp->vertex;
+		x[i] /= L->dat[L->J[i]];
+		for(j = L->J[i]+1; j < L->J[i+1]; j++)
+			x[L->I[j]] -= L->dat[j] * x[i];
+		tmp = tmp->next;
+	}
+	return x;
 }
-}
-return (1) ;
-}
-*/

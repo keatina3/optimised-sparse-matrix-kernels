@@ -3,6 +3,7 @@
 #include "mm.h"
 #include "DAG.h"
 #include "routines.h"
+#include <math.h>
 
 int main(int argc, char* argv[]){
 	//char* fileA = "../torso1/torso1.mtx";
@@ -10,12 +11,12 @@ int main(int argc, char* argv[]){
 	//char* fileA = "../TSOPF_RS_b678_c2/TSOPF_RS_b678_c2.mtx";
 	//char* fileb = "../TSOPF_RS_b678_c2/b_for_TSOPF_RS_b678_c2_b.mtx";
 	char* fileA = "../af_0_k101/af_0_k101.mtx";
-	//char* fileb = "../af_0_k101/b_sparse_af_0_k101.mtx";
-	char* fileb = "../af_0_k101/b_dense_af_0_k101.mtx";
+	char* fileb = "../af_0_k101/b_sparse_af_0_k101.mtx";
+	//char* fileb = "../af_0_k101/b_dense_af_0_k101.mtx";
 	mat_mar A;
 	mat_mar b;
 	mat_mar L;
-	real* x;
+	real *x,*y;
 	dim i,j;
 
 	A = init_mat(fileA);
@@ -24,18 +25,27 @@ int main(int argc, char* argv[]){
 	//printf("%lu, %lf\n",A.I[10],A.dat[10]);
 	//printf("%lu\n",A.J[A.m-1]);
 	
-	x = (real*)calloc(b.m,sizeof(real));
-	CCSvectoArr(&b,x);
+	//x = (real*)calloc(b.m,sizeof(real));
+	//CCSvectoArr(&b,x);
 
-	lsolve(&L, x);
-		
 	Graph* DG = createGraph(L.n);
 	for(i=0;i<L.n;i++)
 		for(j= L.J[i]; j < L.J[i+1]; j++)
 			addEdge(DG, i, L.I[j]);
 	
-	for(i=0;i<b.nz;i++)
-		DFS(DG,b.I[i]);
+	x = lsolve(&L, &b);
+	printf("x[0] = %lf\n",x[L.m-1]);
+	//for(i=0;i<L.m;i++)
+		//if(abs(x[i]) > 0.00001)
+			//printf("x[i] = %lf\n",x[i]);
+	
+	y = lsolve_GP(&L, &b, DG);		
+	printf("x[0] = %lf\n",x[L.m-1]);
+	
+	real SSE = 0;
+	for(i=0;i<L.m;i++)
+		SSE += (y[i]-x[i])*(y[i]-x[i]); 
+	printf("SSE = %lf\n",SSE);
 
 	/*
 	Graph* DG = createGraph(10);

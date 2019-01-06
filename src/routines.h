@@ -1,6 +1,7 @@
 #ifndef ROUT_H
 #define ROUT_H
 
-bool lsolve(mat_mar* L, real* b);
+real* lsolve(mat_mar* L, mat_mar* b);
+real* lsolve_GP(mat_mar* L, mat_mar* b, Graph* graph);
 
 #endif
