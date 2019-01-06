@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -Wall -g
 LDFLAGS = -lm
 
-objects = mmio.o routines.o prog.o
+objects = mmio.o routines.o prog.o DAG.o
 
 prog: $(objects)
 	$(CC) $(LDFLAGS) $(objects) -o $@

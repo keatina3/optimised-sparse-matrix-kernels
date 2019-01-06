@@ -36,8 +36,6 @@ bool CCSvectoArr(mat_mar* b, real* x);
 mat_mar getLvals(mat_mar* A);
 void free_mat(mat_mar* A);
 
-bool lsolve(mat_mar* L, real* b);
-
 
 #define is_matrix(header)		((header)[0]=='M')
 

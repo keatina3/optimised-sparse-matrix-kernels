@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "mm.h"
 #include "DAG.h"
+#include "routines.h"
 
 bool lsolve(mat_mar* L, real* b){
 	dim i, j;
