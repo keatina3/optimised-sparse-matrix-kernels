@@ -87,14 +87,14 @@ int main(int argc, char* argv[]){
 		tmp = tmp->next;
 	}
 	
-	
+	*/	
     displayGraph(DG);
 	node* tmp = DG->reach.head;
 	while(tmp!=NULL){
 		printf("%u\n",1+tmp->vertex);
 		tmp = tmp->next;
 	}
-	*/	
+		
 	freeGraph(DG);
 	free_mat(&A);
 	free_mat(&b);
