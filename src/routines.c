@@ -29,9 +29,8 @@ real* lsolve_GP(mat_mar* L, mat_mar* b, Graph* graph){
 	
 	x = (real*)calloc(b->m,sizeof(real));
 	CCSvectoArr(b,x);
-	
 	for(i=0;i<b->nz;i++)
-		DFS(graph,b->I[i]);
+		DFS(L,graph,b->I[i]);
 	int count = 0;
 	node* tmp = graph->reach.tail;
 	while(tmp!=NULL){
