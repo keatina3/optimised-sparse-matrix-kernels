@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <math.h>
 #include "mm.h"
 #include "DAG.h"
@@ -20,41 +21,48 @@ int main(int argc, char* argv[]){
 	mat_mar b;
 	mat_mar L;
 	real *x,*y;
-	dim i,j;
+	dim i;
+	clock_t start, end;
+	double time_taken;
 
 	A = init_mat(fileA);
 	b = init_mat(fileb);
 	L = getLvals(&A);
-	//printf("%lu, %lf\n",A.I[10],A.dat[10]);
-	//printf("%lu\n",A.J[A.m-1]);
 
 	Graph* DG = createGraph(L.n);
-	
-	x = lsolve(&L, &b);
-	printf("x[0] = %lf\n",x[L.m-1]);
-	//for(i=0;i<L.m;i++)
-	//	printf("x[i] = %lf\n",x[i]);
+	for(i=0;i<b.nz;i++)
+		DFS(&L,DG,b.I[i]);
 
-	y = lsolve_GP(&L, &b, DG);		
-	printf("y[0] = %lf\n",y[L.m-1]);	
-	//for(i=0;i<L.m;i++)
-	//	printf("y[i] = %lf\n",y[i]);
+	start = clock();
+	x = lsolve(&L, &b);
+	end = clock();
+	time_taken = ((double) (end - start)) / CLOCKS_PER_SEC;
+	printf("Time taken: %lf\n", time_taken);
+	
+	start = clock();
+	y = lsolve_GP(&L, &b, DG);
+	end = clock();
+	time_taken = ((double) (end - start)) / CLOCKS_PER_SEC;
+	printf("Time taken: %lf\n", time_taken);
+	
+	printf("y[n] = %lf, x[n] = %lf\n",y[L.m-1],x[L.m-1]);	
+	for(i=0;i<L.m;i++)
+		if(abs(y[L.m-1]) > 0.0 || abs(x[L.m-1]) > 0.0)
+			printf("y[n] = %lf, x[n] = %lf\n",y[L.m-1],x[L.m-1]);	
 	
 	real SSE = 0;
 	for(i=0;i<L.m;i++)
 		SSE += (y[i]-x[i])*(y[i]-x[i]); 
 	printf("SSE = %lf\n",SSE);
 	
-	/*	
-    //displayGraph(DG);
+	
 	dim count = 0;
 	node* tmp = DG->reach.tail;
 	while(tmp!=NULL){
-		printf("%u\n",1+tmp->vertex);
 		count++;
 		tmp = tmp->prev;
 	}
-	*/
+	printf("Count = %lu\n",count);	
 
 	freeGraph(DG);
 	free_mat(&A);

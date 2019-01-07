@@ -1,25 +1,21 @@
 #ifndef _DAG_H_
 #define _DAG_H_
 
-/* Adjacency list node*/
 typedef struct node
 {
-	int vertex;                /*Index to adjacency list array*/
-	struct node *next; /*Pointer to the next node*/
+	int vertex;               
+	struct node *next; 
 	struct node *prev;
 }
 node;
 
-/* Adjacency list */
 typedef struct reachset
 {
-	node *head;					/*head of the adjacency linked list*/
+	node *head;
 	node *tail;
 }
 reachset;
 
-/* Graph structure. A graph is an array of adjacency lists.
-   Size of array will be number of vertices in graph*/
 typedef struct Graph
 {
 	bool* visited;

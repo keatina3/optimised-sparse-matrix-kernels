@@ -3,7 +3,6 @@
 #include "mm.h"
 #include "DAG.h"
 
-/* Function to create an adjacency list node*/
 node* createNode(int v){
 	node* newNode = (node*)malloc(sizeof(node));
 	if(!newNode)
@@ -35,10 +34,8 @@ void freeGraph(Graph* graph){
 			reachPtr = reachPtr->next;
 			free(tmp);
         }
-        	/*Free the adjacency list array*/
         free(graph->visited);
     }
-    	/*Free the graph*/
 	free(graph);
 }
 

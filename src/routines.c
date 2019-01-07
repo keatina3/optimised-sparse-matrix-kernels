@@ -12,7 +12,7 @@ real* lsolve(mat_mar* L, mat_mar* b){
 	
 	x = (real*)calloc(b->m,sizeof(real));
 	CCSvectoArr(b,x);
-
+	
 	for(i=0;i<L->m;i++){
 		x[i] /= L->dat[L->J[i]];
 		for(j = (L->J[i])+1; j < L->J[i+1]; j++)
@@ -26,22 +26,24 @@ real* lsolve_GP(mat_mar* L, mat_mar* b, Graph* graph){
 	real* x;
 	if(!L || !b)
 		return NULL;
-	
+	if(is_dense(L->head)){
+		printf("Gilbert Meierls algorithm for dense RHS of no benefit. Using standard lsolve\n");
+		return lsolve(L,b);
+	}
+
 	x = (real*)calloc(b->m,sizeof(real));
 	CCSvectoArr(b,x);
-	for(i=0;i<b->nz;i++)
-		DFS(L,graph,b->I[i]);
-	int count = 0;
+	
+	//for(i=0;i<b->nz;i++)
+	//	DFS(L,graph,b->I[i]);
+	
 	node* tmp = graph->reach.tail;
 	while(tmp!=NULL){
-		count++;
 		i = tmp->vertex;
-		//printf("R[i] = %lu\n",i);
 		x[i] /= L->dat[L->J[i]];
 		for(j = L->J[i]+1; j < L->J[i+1]; j++)
 			x[L->I[j]] -= L->dat[j] * x[i];
 		tmp = tmp->prev;
 	}
-	printf("Count = %d\n",count);
 	return x;
 }
