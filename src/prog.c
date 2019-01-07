@@ -90,14 +90,12 @@ int main(int argc, char* argv[]){
 	*/	
     //displayGraph(DG);
 	dim count = 0;
-	node* tmp = DG->reach.head;
+	node* tmp = DG->reach.tail;
 	while(tmp!=NULL){
-		//printf("%u\n",1+tmp->vertex);
+		printf("%u\n",1+tmp->vertex);
 		count++;
-		tmp = tmp->next;
+		tmp = tmp->prev;
 	}
-	printf("Count = %lu\n",count);
-		
 	freeGraph(DG);
 	free_mat(&A);
 	free_mat(&b);

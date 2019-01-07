@@ -113,7 +113,7 @@ void DFS(Graph* graph, int vertex) {
 	node* temp = adjList.head;
 	graph->visited[vertex] = 1;
 
-	appendReach(graph,vertex);
+	//appendReach(graph,vertex);
 	//printf("Visited %d \n", vertex);
 
 	while(temp!=NULL){
@@ -123,6 +123,7 @@ void DFS(Graph* graph, int vertex) {
     	}
     	temp = temp->next;
 	}
+	appendReach(graph,vertex);
 }
 
 void appendReach(Graph* graph, int vertex){
@@ -135,6 +136,8 @@ void appendReach(Graph* graph, int vertex){
 	}
 
 	newNode->next = NULL;
+	newNode->prev = old;
 	old->next = newNode;
 	graph->reach.tail = newNode;
+	graph->reach.head->prev = NULL;
 }
