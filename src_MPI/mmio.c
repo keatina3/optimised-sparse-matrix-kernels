@@ -90,6 +90,7 @@ bool read_mm_size(mat_mar* A){
 		}
 	} else{
 		if(sscanf(buffer, "%lu %lu", &A->m, &A->n) == 2){
+			A->nz = (A->m) * (A->n);
 			return 1;
 		}
 	}

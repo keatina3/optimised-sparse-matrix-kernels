@@ -35,13 +35,13 @@ int main(int argc, char* argv[]){
 	
 	x = lsolve(&L, &b);
 	printf("x[0] = %lf\n",x[L.m-1]);
-	for(i=0;i<L.m;i++)
-		printf("x[i] = %lf\n",x[i]);
+	//for(i=0;i<L.m;i++)
+	//	printf("x[i] = %lf\n",x[i]);
 
 	y = lsolve_GP(&L, &b, DG);		
 	printf("y[0] = %lf\n",y[L.m-1]);	
-	for(i=0;i<L.m;i++)
-		printf("y[i] = %lf\n",y[i]);
+	//for(i=0;i<L.m;i++)
+	//	printf("y[i] = %lf\n",y[i]);
 	
 	real SSE = 0;
 	for(i=0;i<L.m;i++)
@@ -88,12 +88,15 @@ int main(int argc, char* argv[]){
 	}
 	
 	*/	
-    displayGraph(DG);
+    //displayGraph(DG);
+	dim count = 0;
 	node* tmp = DG->reach.head;
 	while(tmp!=NULL){
-		printf("%u\n",1+tmp->vertex);
+		//printf("%u\n",1+tmp->vertex);
+		count++;
 		tmp = tmp->next;
 	}
+	printf("Count = %lu\n",count);
 		
 	freeGraph(DG);
 	free_mat(&A);

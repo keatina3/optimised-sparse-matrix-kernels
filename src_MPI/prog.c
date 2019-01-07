@@ -8,11 +8,11 @@ int main(int argc, char* argv[]){
 	//char* fileb = "../torso1/b_for_torso1.mtx";
 	//char* fileA = "../TSOPF_RS_b678_c2/TSOPF_RS_b678_c2.mtx";
 	//char* fileb = "../TSOPF_RS_b678_c2/b_for_TSOPF_RS_b678_c2_b.mtx";
-	//char* fileA = "../af_0_k101/af_0_k101.mtx";
+	char* fileA = "../af_0_k101/af_0_k101.mtx";
 	//char* fileb = "../af_0_k101/b_sparse_af_0_k101.mtx";
-	//char* fileb = "../af_0_k101/b_dense_af_0_k101.mtx";
-	char* fileA = "../test_L.mtx";
-	char* fileb = "../test_b.mtx";
+	char* fileb = "../af_0_k101/b_dense_af_0_k101.mtx";
+	//char* fileA = "../test_L.mtx";
+	//char* fileb = "../test_b.mtx";
 	int myid, nprocs;
 	int root = 0;
 	mat_mar A,L,b;
