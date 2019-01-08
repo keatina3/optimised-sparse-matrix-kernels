@@ -56,6 +56,9 @@ void appendReach(Graph* graph, int vertex){
 	graph->reach.head->prev = NULL;
 }
 
+
+/* Make this more modular! */
+
 void DFS(mat_mar* L, Graph* graph, int vertex) {
 	graph->visited[vertex] = 1;
 	dim i;

@@ -19,6 +19,8 @@ reachset;
 typedef struct Graph
 {
 	bool* visited;
+	int* depth;
+	dim reachCard;
 	reachset reach;
 }
 Graph;
@@ -28,5 +30,6 @@ Graph* createGraph(int n);
 void freeGraph(Graph* graph);
 void appendReach(Graph* graph, int vertex);
 void DFS(mat_mar* L, Graph* graph, int vertex);
+Graph* getReach(mat_mar* L, mat_mar* b);
 
 #endif
