@@ -24,13 +24,14 @@ Graph* createGraph(dim n){
 	graph->visited = (bool*)calloc(n,sizeof(bool));
 	graph->reach.head = NULL;
 	graph->reach.tail = graph->reach.head;
+	graph->critPath = 0;
 	return graph;
 }
 
 void freeGraph(Graph* graph){
 	if(graph){
 		node* reachPtr = graph->reach.head;
-		while (reachPtr){
+		while (reachPtr!=NULL){
 			node* tmp = reachPtr;
 			reachPtr = reachPtr->next;
 			free(tmp);
@@ -41,26 +42,41 @@ void freeGraph(Graph* graph){
 	free(graph);
 }
 
+void freeLevelSet(levelSet* G){
+	dim i;
+	for(i=0;i<G->numLevels;i++){
+		node* ptr = G->level_ptr[i].head;
+		while(ptr!=NULL){
+			node* tmp = ptr;
+			ptr = ptr->next;
+			free(tmp);
+		}
+	}
+	free(G->level_ptr);
+	free(G);
+}
 
-void appendReach(Graph* graph, dim vertex){
+void appendSet(reachset* reach, dim vertex){
 	node* newNode = createNode(vertex);
-	node* old = graph->reach.tail;
+	node* old = reach->tail;
     
-	if(graph->reach.head == NULL){
-    	graph->reach.head = newNode;
-    	old = graph->reach.head;
+	if(reach->head == NULL){
+    	reach->head = newNode;
+    	old = reach->head;
 	}
 
 	newNode->next = NULL;
 	newNode->prev = old;
 	old->next = newNode;
-	graph->reach.tail = newNode;
-	graph->reach.head->prev = NULL;
+	reach->tail = newNode;
+	reach->head->prev = NULL;
 }
 
 void DFS(mat_mar* L, Graph* graph, dim vertex, dim count) {
 	graph->visited[vertex] = 1;
 	count++;
+	if(count > graph->critPath)
+		graph->critPath = count;
 	graph->depth[vertex] = count;
 	dim i;
 	for(i = (L->J[vertex]+1); i < L->J[vertex+1]; i++){
@@ -71,12 +87,14 @@ void DFS(mat_mar* L, Graph* graph, dim vertex, dim count) {
 			adjustDepth(L, graph, L->I[i], count);
 	}
 	graph->reachCard++;
-	appendReach(graph, vertex);
+	appendSet(&graph->reach, vertex);
 }
 
 void adjustDepth(mat_mar* L, Graph* graph, dim vertex, dim count){
 	graph->depth[vertex] = count+1;
 	count++;
+	if(count > graph->critPath)
+		graph->critPath = count;
 	dim i;
 	for(i = (L->J[vertex]+1); i < L->J[vertex+1]; i++){
 		if(graph->depth[L->I[i]] < count+1)
@@ -92,4 +110,23 @@ Graph* getReach(mat_mar* L, mat_mar* b){
 		if(graph->visited[i] == 0)
 			DFS(L, graph, b->I[i],0);
 	return graph;
+}
+
+levelSet* assignLevelSet(Graph* graph){
+	levelSet* G = (levelSet*)malloc(sizeof(levelSet));
+	G->numLevels = graph->critPath;
+	G->level_ptr = (reachset*)malloc(G->numLevels*sizeof(reachset));
+	node* tmp = graph->reach.tail;
+	dim i;
+	for(i=0;i<G->numLevels;i++){
+		G->level_ptr[i].head = NULL;
+		G->level_ptr[i].tail = G->level_ptr[i].head;
+	}
+	while(tmp!=NULL){
+		dim set = graph->depth[tmp->vertex];
+		appendSet(&G->level_ptr[set-1], tmp->vertex);
+		tmp = tmp->prev;
+	}
+
+	return G;
 }

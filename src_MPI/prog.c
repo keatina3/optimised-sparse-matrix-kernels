@@ -4,6 +4,7 @@
 #include <time.h>
 #include "mm.h"
 #include "DAG.h"
+#include "utils.h"
 
 int main(int argc, char* argv[]){
 	//char* fileA = "../torso1/torso1.mtx";
@@ -34,11 +35,12 @@ int main(int argc, char* argv[]){
 			printf("node = %lu, levelset = %lu\n",1+tmp->vertex,DG->depth[tmp->vertex]);
 			tmp = tmp->prev;
 		}
-
+		levelSet* G = assignLevelSet(DG);
 		free_mat(&A);
 		free_mat(&b);
 		free_mat(&L);
 		freeGraph(DG);
+		//freeLevelSet(G);
 	}
 	
 	// INSERT DATA DISPERSION HERE //
