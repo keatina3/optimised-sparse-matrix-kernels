@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <time.h>
 #include "mm.h"
+#include "DAG.h"
 
 int main(int argc, char* argv[]){
 	//char* fileA = "../torso1/torso1.mtx";
@@ -16,7 +18,7 @@ int main(int argc, char* argv[]){
 	int myid, nprocs;
 	int root = 0;
 	mat_mar A,L,b;
-	
+
 	MPI_Init(&argc,&argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
@@ -25,6 +27,7 @@ int main(int argc, char* argv[]){
 		A = init_mat(fileA);
 		L = getLvals(&A);
 		b = init_mat(fileb);
+		Graph* DG = createGraph(L.n);
 	}
 	
 	// INSERT DATA DISPERSION HERE //

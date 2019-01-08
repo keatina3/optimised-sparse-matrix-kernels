@@ -11,15 +11,13 @@ int main(int argc, char* argv[]){
 	//char* fileb = "../torso1/b_for_torso1.mtx";
 	//char* fileA = "../TSOPF_RS_b678_c2/TSOPF_RS_b678_c2.mtx";
 	//char* fileb = "../TSOPF_RS_b678_c2/b_for_TSOPF_RS_b678_c2_b.mtx";
-	char* fileA = "../af_0_k101/af_0_k101.mtx";
-	char* fileb = "../af_0_k101/b_sparse_af_0_k101.mtx";
+	//char* fileA = "../af_0_k101/af_0_k101.mtx";
+	//char* fileb = "../af_0_k101/b_sparse_af_0_k101.mtx";
 	//char* fileb = "../af_0_k101/b_dense_af_0_k101.mtx";
-	//char* fileA = "../test_L.mtx";
-	//char* fileb = "../test_b.mtx";
+	char* fileA = "../test_L.mtx";
+	char* fileb = "../test_b.mtx";
 	
-	mat_mar A;
-	mat_mar b;
-	mat_mar L;
+	mat_mar A, b, L;
 	real *x,*y;
 	dim i;
 	clock_t start, end;
@@ -29,10 +27,6 @@ int main(int argc, char* argv[]){
 	b = init_mat(fileb);
 	L = getLvals(&A);
 
-	Graph* DG = createGraph(L.n);
-	for(i=0;i<b.nz;i++)
-		DFS(&L,DG,b.I[i]);
-
 	start = clock();
 	x = lsolve(&L, &b);
 	end = clock();
@@ -40,6 +34,9 @@ int main(int argc, char* argv[]){
 	printf("Time taken: %lf\n", time_taken);
 	
 	start = clock();
+	Graph* DG = getReach(&L, &b);
+	//for(i=0;i<b.nz;i++)
+	//	DFS(&L,DG,b.I[i]);
 	y = lsolve_GP(&L, &b, DG);
 	end = clock();
 	time_taken = ((double) (end - start)) / CLOCKS_PER_SEC;

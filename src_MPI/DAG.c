@@ -59,19 +59,8 @@ void appendReach(Graph* graph, int vertex){
 void DFS(mat_mar* L, Graph* graph, int vertex) {
 	graph->visited[vertex] = 1;
 	dim i;
-	for(i = (L->J[vertex]+1); i < L->J[vertex+1]; i++){
-		if(graph->visited[L->I[i]] == 0){
+	for(i = (L->J[vertex]+1); i < L->J[vertex+1]; i++)
+		if(graph->visited[L->I[i]] == 0)
 			DFS(L, graph, L->I[i]);
-		}
-	}
 	appendReach(graph, vertex);
-}
-
-Graph* getReach(mat_mar* L, mat_mar* b){
-	Graph* graph = createGraph(L->n);
-	dim i;
-	for(i=0;i<b->nz;i++)
-		if(graph->visited[i] == 0)
-			DFS(L, graph, b->I[i]);
-	return graph;
 }

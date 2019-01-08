@@ -3,7 +3,7 @@ CC = mpicc
 CFLAGS = -Wall -g
 LDFLAGS = -lm
 
-objects = mmio.o prog.o
+objects = mmio.o DAG.o prog.o
 
 prog: $(objects)
 	$(CC) $(LDFLAGS) $(objects) -o $@
