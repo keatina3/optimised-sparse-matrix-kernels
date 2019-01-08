@@ -3,7 +3,7 @@
 #include "mm.h"
 #include "DAG.h"
 
-node* createNode(int v){
+node* createNode(dim v){
 	node* newNode = (node*)malloc(sizeof(node));
 	if(!newNode)
 		printf("Error creating node\n");
@@ -15,11 +15,12 @@ node* createNode(int v){
 	return newNode;
 }
 
-Graph* createGraph(int n){
+Graph* createGraph(dim n){
 	Graph* graph = (Graph*)malloc(sizeof(Graph));
 	if(!graph)
 		printf("Error allocating DAG.\n");
 	
+	graph->depth = (dim*)calloc(n,sizeof(dim));
 	graph->visited = (bool*)calloc(n,sizeof(bool));
 	graph->reach.head = NULL;
 	graph->reach.tail = graph->reach.head;
@@ -34,13 +35,14 @@ void freeGraph(Graph* graph){
 			reachPtr = reachPtr->next;
 			free(tmp);
         }
+		free(graph->depth);
         free(graph->visited);
     }
 	free(graph);
 }
 
 
-void appendReach(Graph* graph, int vertex){
+void appendReach(Graph* graph, dim vertex){
 	node* newNode = createNode(vertex);
 	node* old = graph->reach.tail;
     
@@ -56,16 +58,31 @@ void appendReach(Graph* graph, int vertex){
 	graph->reach.head->prev = NULL;
 }
 
-void DFS(mat_mar* L, Graph* graph, int vertex) {
+void DFS(mat_mar* L, Graph* graph, dim vertex, dim count) {
 	graph->visited[vertex] = 1;
+	count++;
+	graph->depth[vertex] = count;
 	dim i;
 	for(i = (L->J[vertex]+1); i < L->J[vertex+1]; i++){
 		if(graph->visited[L->I[i]] == 0){
-			DFS(L, graph, L->I[i]);
+			DFS(L, graph, L->I[i], count);
 		}
+		if(graph->depth[L->I[i]] < count+1)
+			adjustDepth(L, graph, L->I[i], count);
+			//graph->depth[L->I[i]] = count+1;
 	}
 	graph->reachCard++;
 	appendReach(graph, vertex);
+}
+
+void adjustDepth(mat_mar* L, Graph* graph, dim vertex, dim count){
+	graph->depth[vertex] = count+1;
+	count++;
+	dim i;
+	for(i = (L->J[vertex]+1); i < L->J[vertex+1]; i++){
+		if(graph->depth[L->I[i]] < count+1)
+			adjustDepth(L, graph, L->I[i], count);
+	}
 }
 
 Graph* getReach(mat_mar* L, mat_mar* b){
@@ -74,39 +91,41 @@ Graph* getReach(mat_mar* L, mat_mar* b){
 	graph->reachCard = 0;
 	for(i=0;i<b->nz;i++)
 		if(graph->visited[i] == 0)
-			DFS(L, graph, b->I[i]);
+			DFS(L, graph, b->I[i],0);
 	return graph;
 }
 
-void getLevels(mat_mar* L, Graph* graph, real* levelSets, real** levelSets_ptr){
-	levelSets = (real*)calloc(2*graph->reachCard,sizeof(real));
-	levelSets_ptr = (real**)malloc(2*sizeof(real*));
+/*
+void getLevels(mat_mar* L, Graph* graph, dim* levelSets, dim** levelSets_ptr){
 	levelSets_ptr[0] = levelSets;
 	levelSets_ptr[1] = &levelSets[graph->reachCard];
-	graph->depth = (int*)calloc(L->m, sizeof(int));
+	graph->depth = (dim*)calloc(L->m, sizeof(dim));
 
-	int parent,child,depmax,i,count;
+	dim parent,child,depmax,i,count;
 	node* tmp1 = graph->reach.tail;
+
+	count = 0;
 	while(tmp1!=NULL){
-		count = 0;
 		depmax = 0;
-		node* tmp2 = graph->reach.tail;
-		while(tmp2 != tmp1){
-			child = tmp1->vertex;
+		node* tmp2 = tmp1;
+		child = tmp1->vertex;
+		while(tmp2 != NULL){
 			parent = tmp2->vertex;
 			if( (child > parent) && (child <= L->I[L->J[parent+1]-1]) ){
 				for(i = L->J[parent]; i < L->J[parent+1]; i++){
-					if(child == L->I[i] && graph->depth[i] > depmax){
-						depmax = graph->depth[i];
+					if(child == L->I[i] && graph->depth[parent] >= depmax){
+						depmax = graph->depth[parent];
+						break;
 					}
 				}
 			}
-			tmp2 = tmp2->prev;
+			tmp2 = tmp2->next;
 		}
 		graph->depth[tmp1->vertex] = depmax + 1;
 		levelSets_ptr[0][count] = tmp1->vertex;
-		levelSets_ptr[1][count] = depmax;
+		levelSets_ptr[1][count] = depmax + 1;
 		tmp1 = tmp1->prev;
 		count++;
 	}
 }
+*/
