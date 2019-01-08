@@ -45,10 +45,10 @@ void freeGraph(Graph* graph){
 void freeLevelSet(levelSet* G){
 	dim i;
 	for(i=0;i<G->numLevels;i++){
-		node* ptr = G->level_ptr[i].head;
+		node* ptr = G->level_ptr[i].tail;
 		while(ptr!=NULL){
 			node* tmp = ptr;
-			ptr = ptr->next;
+			ptr = ptr->prev;
 			free(tmp);
 		}
 	}

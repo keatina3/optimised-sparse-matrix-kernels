@@ -11,11 +11,11 @@ int main(int argc, char* argv[]){
 	//char* fileb = "../torso1/b_for_torso1.mtx";
 	//char* fileA = "../TSOPF_RS_b678_c2/TSOPF_RS_b678_c2.mtx";
 	//char* fileb = "../TSOPF_RS_b678_c2/b_for_TSOPF_RS_b678_c2_b.mtx";
-	//char* fileA = "../af_0_k101/af_0_k101.mtx";
-	//char* fileb = "../af_0_k101/b_sparse_af_0_k101.mtx";
+	char* fileA = "../af_0_k101/af_0_k101.mtx";
+	char* fileb = "../af_0_k101/b_sparse_af_0_k101.mtx";
 	//char* fileb = "../af_0_k101/b_dense_af_0_k101.mtx";
-	char* fileA = "../test_L.mtx";
-	char* fileb = "../test_b.mtx";
+	//char* fileA = "../test_L.mtx";
+	//char* fileb = "../test_b.mtx";
 	int myid, nprocs;
 	int root = 0;
 	mat_mar A,L,b;
@@ -31,16 +31,27 @@ int main(int argc, char* argv[]){
 		b = init_mat(fileb);
 		Graph* DG = getReach(&L, &b);
 		node* tmp = DG->reach.tail;
+		/*
 		while(tmp!=NULL){
 			printf("node = %lu, levelset = %lu\n",1+tmp->vertex,DG->depth[tmp->vertex]);
 			tmp = tmp->prev;
 		}
+		*/
 		levelSet* G = assignLevelSet(DG);
+		dim i;
+		for(i=0;i<G->numLevels;i++){
+			node* tmp = G->level_ptr[i].tail;
+			while(tmp!=NULL){
+				printf("Level = %lu, Node = %lu\n",i+1,1+tmp->vertex);
+				tmp = tmp->prev;
+			}
+		}
+		
 		free_mat(&A);
 		free_mat(&b);
 		free_mat(&L);
 		freeGraph(DG);
-		//freeLevelSet(G);
+		freeLevelSet(G);
 	}
 	
 	// INSERT DATA DISPERSION HERE //
