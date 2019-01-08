@@ -69,7 +69,6 @@ void DFS(mat_mar* L, Graph* graph, dim vertex, dim count) {
 		}
 		if(graph->depth[L->I[i]] < count+1)
 			adjustDepth(L, graph, L->I[i], count);
-			//graph->depth[L->I[i]] = count+1;
 	}
 	graph->reachCard++;
 	appendReach(graph, vertex);
@@ -94,38 +93,3 @@ Graph* getReach(mat_mar* L, mat_mar* b){
 			DFS(L, graph, b->I[i],0);
 	return graph;
 }
-
-/*
-void getLevels(mat_mar* L, Graph* graph, dim* levelSets, dim** levelSets_ptr){
-	levelSets_ptr[0] = levelSets;
-	levelSets_ptr[1] = &levelSets[graph->reachCard];
-	graph->depth = (dim*)calloc(L->m, sizeof(dim));
-
-	dim parent,child,depmax,i,count;
-	node* tmp1 = graph->reach.tail;
-
-	count = 0;
-	while(tmp1!=NULL){
-		depmax = 0;
-		node* tmp2 = tmp1;
-		child = tmp1->vertex;
-		while(tmp2 != NULL){
-			parent = tmp2->vertex;
-			if( (child > parent) && (child <= L->I[L->J[parent+1]-1]) ){
-				for(i = L->J[parent]; i < L->J[parent+1]; i++){
-					if(child == L->I[i] && graph->depth[parent] >= depmax){
-						depmax = graph->depth[parent];
-						break;
-					}
-				}
-			}
-			tmp2 = tmp2->next;
-		}
-		graph->depth[tmp1->vertex] = depmax + 1;
-		levelSets_ptr[0][count] = tmp1->vertex;
-		levelSets_ptr[1][count] = depmax + 1;
-		tmp1 = tmp1->prev;
-		count++;
-	}
-}
-*/
