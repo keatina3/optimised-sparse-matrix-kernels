@@ -28,8 +28,9 @@ void decomp1d(dim n, dim p, dim myid, dim *s, dim *e){
     }
 }
 
-void assignCols(dim *colInd, dim* colCount, int myid, int nprocs, int root, levelSet* G, dim level, MPI_Comm communicator){
+dim* assignCols(dim* colCount, int myid, int nprocs, int root, levelSet* G, dim level, MPI_Comm communicator){
 	dim s,e;
+	dim* colInd;
 	int i,j;
 	MPI_Status status;
 	dim setCard;
@@ -38,11 +39,9 @@ void assignCols(dim *colInd, dim* colCount, int myid, int nprocs, int root, leve
 		setCard = G->level_ptr[level].numElems;
 	}
 	MPI_Bcast(&setCard,1,MPI_UNSIGNED_LONG,root,communicator);
-	printf("cardinality of set = %lu\n", setCard);	
 	decomp1d(setCard, nprocs, myid, &s, &e);
 	*colCount = e-s+1;
 	colInd = (dim*)malloc((*colCount) * sizeof(dim));
-	printf("myid = %d,colCount = %lu\n",myid, *colCount);
 	if(myid == root){
 		node* tmp = G->level_ptr[level].tail;
 		for(i=0;i<*colCount;i++){
@@ -61,13 +60,16 @@ void assignCols(dim *colInd, dim* colCount, int myid, int nprocs, int root, leve
 				}
 				MPI_Send(sendArr,sendCount,MPI_UNSIGNED_LONG,i,0,MPI_COMM_WORLD);
 				free(sendArr);
+			} else {
+				break;
 			}
 		}
 	} else {
-		if(colCount>0){
+		if(*colCount>0){
 			MPI_Recv(colInd,*colCount,MPI_UNSIGNED_LONG,root,0,MPI_COMM_WORLD, &status);
 		}
 	}
+	return colInd;
 }
 
 void BcastMatrix(mat_mar* A, int root, int myid, MPI_Comm communicator){

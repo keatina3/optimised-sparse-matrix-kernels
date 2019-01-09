@@ -4,6 +4,7 @@
 #include <time.h>
 #include "mm.h"
 #include "DAG.h"
+#include "routines.h"
 #include "utils.h"
 
 int main(int argc, char* argv[]){
@@ -18,12 +19,11 @@ int main(int argc, char* argv[]){
 	char* fileb = "../test_b.mtx";
 	int myid, nprocs, root = 0;
 	mat_mar A,L,b;
-	real *x;
-	dim *colInd;
-	dim colCount;
+	real *x,*y;
 	levelSet* G;
 	Graph* DG;
-
+	dim i;
+	
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
@@ -35,8 +35,7 @@ int main(int argc, char* argv[]){
 		DG = getReach(&L, &b);
 		node* tmp = DG->reach.tail;
 		G = assignLevelSet(DG);
-		dim i;
-		/*
+		
 		for(i=0;i<G->numLevels;i++){
 			node* tmp = G->level_ptr[i].tail;
 			while(tmp!=NULL){
@@ -44,7 +43,7 @@ int main(int argc, char* argv[]){
 				tmp = tmp->prev;
 			}
 		}
-		*/
+		
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 
@@ -52,17 +51,18 @@ int main(int argc, char* argv[]){
 	
 	BcastMatrix(&L, 0, myid, MPI_COMM_WORLD);
 	BcastMatrix(&b, 0, myid, MPI_COMM_WORLD);
-	x = (real*)malloc(b.m*sizeof(real));
+	//x = (real*)malloc(b.m*sizeof(real));
 
 	// INSERT ROUTINES HERE //
+	x = lsolve_Par(&L, &b, G, myid, nprocs, root, MPI_COMM_WORLD);
 	
-	assignCols(colInd, &colCount, myid, nprocs, root, G, 0,MPI_COMM_WORLD);
-	//printf("myid = %d, colCount = %lu\n", myid, colCount);
-	//dim i;
-	//for(i=0;i<G->numLevels;i++){
-
-	//}
-
+	if(myid==root){
+		y = lsolve(&L, &b);
+		for(i=0;i<b.m;i++){
+			printf("x[i] = %lf, y[i] = %lf\n",x[i],y[i]);
+		}
+	}
+	
 	// INSERT DATA GATHERING HERE //
 
 
