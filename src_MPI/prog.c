@@ -27,7 +27,7 @@ int main(int argc, char* argv[]){
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-
+	
 	if(myid==root){
 		A = init_mat(fileA);
 		L = getLvals(&A);
@@ -45,12 +45,11 @@ int main(int argc, char* argv[]){
 		}
 		
 	}
-	MPI_Barrier(MPI_COMM_WORLD);
-
+	/*
 	// INSERT DATA DISPERSION HERE //
 	
-	BcastMatrix(&L, 0, myid, MPI_COMM_WORLD);
-	BcastMatrix(&b, 0, myid, MPI_COMM_WORLD);
+	BcastMatrix(&L, myid, root, MPI_COMM_WORLD);
+	BcastMatrix(&b, myid, root, MPI_COMM_WORLD);
 	//x = (real*)malloc(b.m*sizeof(real));
 
 	// INSERT ROUTINES HERE //
@@ -62,13 +61,14 @@ int main(int argc, char* argv[]){
 			printf("x[i] = %lf, y[i] = %lf\n",x[i],y[i]);
 		}
 	}
-	
+	*/
+	printf("random test\n");
 	// INSERT DATA GATHERING HERE //
 
 
-
-	free_mat(&L);
-	free_mat(&b);
+	
+	//free_mat(&L);
+	//free_mat(&b);
 	if(myid==root){
 		free_mat(&A);
 		freeGraph(DG);

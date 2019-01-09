@@ -28,6 +28,7 @@ real* lsolve_Par(mat_mar* L, mat_mar* b, levelSet* G, int myid, int nprocs, int 
 	dim colCount, col, *colIndex;
 	real* x;
 	dim numLevels;
+	MPI_Request* request;
 	if(!L || !b)
 		return NULL;
 
@@ -44,14 +45,16 @@ real* lsolve_Par(mat_mar* L, mat_mar* b, levelSet* G, int myid, int nprocs, int 
 		//printf("Test 6, myid = %d,colCount = %lu,level = %lu\n",myid,colCount,i);
 		for(j=0;j<colCount;j++){
 			col = colIndex[j];
-			printf("col = %lu, myid = %d\n",col,myid);
+			//printf("col = %lu, myid = %d\n",col,myid);
 			x[col] /= L->dat[L->J[col]];
-			for(k = L->J[col]+1; k < L->J[col+1]; k++)
-				x[L->I[k]] -= L->dat[k] * x[col];			
+			for(k = L->J[col]+1; k < L->J[col+1]; k++){
+				x[L->I[k]] -= L->dat[k] * x[col];
+			}
 			//MPI_Bcast(&x[col],1,MPI_DOUBLE,myid,comm);
 			//MPI_Ibcast(&x[j],1,MPI_DOUBLE,myid,comm,&request[j]);
 		}
-		free(colIndex);
+		if(colCount>0)
+			free(colIndex);
 		//MPI_Waitsome(L->m,request,colCount,colInd,stat);
 	}
 	return x;
