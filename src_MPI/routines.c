@@ -39,13 +39,11 @@ real* lsolve_Par(mat_mar* L, mat_mar* b, levelSet* G, int myid, int nprocs, int 
 	}
 	MPI_Bcast(x,b->m,MPI_DOUBLE,root,comm);
 	MPI_Bcast(&numLevels,1,MPI_UNSIGNED_LONG,root,comm);
-	//MPI_Request *request = (request*)malloc(L-m*sizeof(MPI_Request));
+	
 	for(i=0;i<numLevels;i++){
 		colIndex = assignCols(&colCount,myid,nprocs,root,G,i,comm);
-		//printf("Test 6, myid = %d,colCount = %lu,level = %lu\n",myid,colCount,i);
 		for(j=0;j<colCount;j++){
 			col = colIndex[j];
-			//printf("col = %lu, myid = %d\n",col,myid);
 			x[col] /= L->dat[L->J[col]];
 			for(k = L->J[col]+1; k < L->J[col+1]; k++){
 				x[L->I[k]] -= L->dat[k] * x[col];

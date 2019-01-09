@@ -45,12 +45,11 @@ int main(int argc, char* argv[]){
 		}
 		
 	}
-	/*
+	
 	// INSERT DATA DISPERSION HERE //
 	
 	BcastMatrix(&L, myid, root, MPI_COMM_WORLD);
 	BcastMatrix(&b, myid, root, MPI_COMM_WORLD);
-	//x = (real*)malloc(b.m*sizeof(real));
 
 	// INSERT ROUTINES HERE //
 	x = lsolve_Par(&L, &b, G, myid, nprocs, root, MPI_COMM_WORLD);
@@ -61,14 +60,13 @@ int main(int argc, char* argv[]){
 			printf("x[i] = %lf, y[i] = %lf\n",x[i],y[i]);
 		}
 	}
-	*/
-	printf("random test\n");
+	
 	// INSERT DATA GATHERING HERE //
 
 
 	
-	//free_mat(&L);
-	//free_mat(&b);
+	free_mat(&L);
+	free_mat(&b);
 	if(myid==root){
 		free_mat(&A);
 		freeGraph(DG);

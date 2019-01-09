@@ -121,6 +121,7 @@ levelSet* assignLevelSet(Graph* graph){
 	for(i=0;i<G->numLevels;i++){
 		G->level_ptr[i].head = NULL;
 		G->level_ptr[i].tail = G->level_ptr[i].head;
+		G->level_ptr[i].numElems = 0;
 	}
 	while(tmp!=NULL){
 		dim set = graph->depth[tmp->vertex];

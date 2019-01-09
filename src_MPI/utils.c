@@ -7,7 +7,6 @@
 
 void decomp1d(dim n, dim p, dim myid, dim *s, dim *e){
     int d,r;
-	printf("NPROCS = %d\n",p);
 	if(p >  n){
 		if(myid < n){
 			*s = myid;
@@ -37,13 +36,11 @@ dim* assignCols(dim* colCount, int myid, int nprocs, int root, levelSet* G, dim 
 	dim setCard;
 	if(myid == root){
 		setCard = G->level_ptr[level].numElems;
-		printf("Set cardinality = %lu\n",setCard);
 	}
 	MPI_Bcast(&setCard,1,MPI_UNSIGNED_LONG,root,communicator);
 	MPI_Barrier(communicator);
 	decomp1d(setCard, nprocs, myid, &s, &e);
 	*colCount = e-s+1;
-	//printf("MYID = %d, colCount = %lu.SETCARD = %lu THIS IN ASSIGN COLS\n",myid,setCard,*colCount);
 	if(*colCount>0)
 		colInd = (dim*)malloc((*colCount) * sizeof(dim));
 	if(myid == root){
