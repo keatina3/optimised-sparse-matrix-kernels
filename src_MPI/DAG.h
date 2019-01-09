@@ -29,7 +29,6 @@ typedef struct Graph
 	bool* visited;
 	dim critPath;
 	dim* depth;
-	dim reachCard;
 	reachset reach;
 }
 Graph;

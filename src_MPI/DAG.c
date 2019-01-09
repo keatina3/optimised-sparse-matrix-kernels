@@ -86,7 +86,7 @@ void DFS(mat_mar* L, Graph* graph, dim vertex, dim count) {
 		if(graph->depth[L->I[i]] < count+1)
 			adjustDepth(L, graph, L->I[i], count);
 	}
-	graph->reachCard++;
+	graph->reach.numElems++;
 	appendSet(&graph->reach, vertex);
 }
 
@@ -105,7 +105,7 @@ void adjustDepth(mat_mar* L, Graph* graph, dim vertex, dim count){
 Graph* getReach(mat_mar* L, mat_mar* b){
 	Graph* graph = createGraph(L->n);
 	dim i;
-	graph->reachCard = 0;
+	graph->reach.numElems = 0;
 	for(i=0;i<b->nz;i++)
 		if(graph->visited[i] == 0)
 			DFS(L, graph, b->I[i],0);
