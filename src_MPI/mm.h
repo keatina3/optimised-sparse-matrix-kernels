@@ -24,7 +24,6 @@ typedef struct
 mat_mar;
 
 
-
 bool read_mm_head(mat_mar* A);
 bool read_mm_size(mat_mar* A);
 bool read_mm_data(mat_mar* A);

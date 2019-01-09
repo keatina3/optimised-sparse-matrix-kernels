@@ -13,7 +13,7 @@ typedef struct reachset
 {
 	node *head;
 	node *tail;
-	dim numElems;		// change this to be reachCard!
+	dim numElems;
 }
 reachset;
 

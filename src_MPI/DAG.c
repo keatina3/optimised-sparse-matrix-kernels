@@ -70,6 +70,7 @@ void appendSet(reachset* reach, dim vertex){
 	old->next = newNode;
 	reach->tail = newNode;
 	reach->head->prev = NULL;
+	reach->numElems++;
 }
 
 void DFS(mat_mar* L, Graph* graph, dim vertex, dim count) {
@@ -86,7 +87,6 @@ void DFS(mat_mar* L, Graph* graph, dim vertex, dim count) {
 		if(graph->depth[L->I[i]] < count+1)
 			adjustDepth(L, graph, L->I[i], count);
 	}
-	graph->reach.numElems++;
 	appendSet(&graph->reach, vertex);
 }
 
