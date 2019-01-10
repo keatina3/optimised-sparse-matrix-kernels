@@ -67,7 +67,7 @@ void DFS(mat_mar* L, Graph* graph, dim vertex) {
 	dim i;
 	for(i = (L->J[vertex]+1); i < L->J[vertex+1]; i++){			// looping through all dependencies of 'vertex'. Using matrix as a DAG.
 		if(graph->visited[L->I[i]] == 0){
-			DFS(L, graph, L->I[i], count);						// recursive. Do if not visited.
+			DFS(L, graph, L->I[i]);						// recursive. Do if not visited.
 		}
 	}
 	appendSet(&graph->reach, vertex);			// once fn has recusively worked its way throug all child nodes, add node to reachset.
@@ -80,6 +80,6 @@ Graph* getReach(mat_mar* L, mat_mar* b){		// apply DFS for all relevant entry no
 	graph->reach.numElems = 0;
 	for(i=0;i<b->nz;i++)
 		if(graph->visited[i] == 0)
-			DFS(L, graph, b->I[i],0);
+			DFS(L, graph, b->I[i]);
 	return graph;
 }

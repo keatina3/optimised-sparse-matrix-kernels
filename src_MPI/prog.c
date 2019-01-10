@@ -70,7 +70,7 @@ int main(int argc, char* argv[]){
 	x = lsolve_Par(&L, &b, G, myid, nprocs, root, MPI_COMM_WORLD);
 	end = clock();
 	time_taken = ((double)(end-start))/CLOCKS_PER_SEC;
-	printf("Time taken: %lf, Nprocs = %d\n",time_taken,nprocs);
+	if(myid==root) printf("Time taken: %lf, Nprocs = %d\n",time_taken,nprocs);
 
 	// VERIFICATION //
 	

@@ -12,8 +12,9 @@ real* lsolve(mat_mar* L, mat_mar* b){
 		return NULL;
 	if(is_dense(L->head)){
 		printf("Error. File not in CCS format\n");
-		return NULL
-	
+		return NULL;
+	}
+
 	x = (real*)calloc(b->m,sizeof(real));
 	CCSvectoArr(b,x);
 	
@@ -33,7 +34,7 @@ real* lsolve_GP(mat_mar* L, mat_mar* b, Graph* graph){
 		return NULL;
 	if(is_dense(L->head)){
 		printf("Error. File not in CCS format\n");
-		return NULL
+		return NULL;
 	}
 
 	x = (real*)calloc(b->m,sizeof(real));
