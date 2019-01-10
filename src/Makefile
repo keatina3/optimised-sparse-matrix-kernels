@@ -5,12 +5,12 @@ LDFLAGS = -lm
 
 #### Alternate test files locations ####
 
-#fileA = "../torso1/torso1.mtx";
-#fileb = "../torso1/b_for_torso1.mtx";
-#fileA = "../TSOPF_RS_b678_c2/TSOPF_RS_b678_c2.mtx";
-#fileb = "../TSOPF_RS_b678_c2/b_for_TSOPF_RS_b678_c2_b.mtx";
-#fileA = "../test_L.mtx";
-#fileb = "../test_b.mtx";
+#fileA = "../torso1/torso1.mtx"
+#fileb = "../torso1/b_for_torso1.mtx"
+#fileA = "../TSOPF_RS_b678_c2/TSOPF_RS_b678_c2.mtx"
+#fileb = "../TSOPF_RS_b678_c2/b_for_TSOPF_RS_b678_c2_b.mtx"
+#fileA = "../test_L.mtx"
+#fileb = "../test_b.mtx"
 ########################################
 
 fileA = "../af_0_k101/af_0_k101.mtx"

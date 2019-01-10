@@ -20,7 +20,7 @@ int main(int argc, char* argv[]){
 	char* fileA;
 	char* fileb;
 	int option = 0;
-
+	
 	while ((option = getopt(argc, argv,"L:b:")) != -1) {
     	switch (option) {
         	case 'L' : fileA = optarg;
@@ -49,8 +49,8 @@ int main(int argc, char* argv[]){
 	printf("Time taken: %lf\n", time_taken);
 	
 	/* Gilbert-Meierls */
-	start = clock();
 	Graph* DG = getReach(&L, &b);
+	start = clock();
 	y = lsolve_GP(&L, &b, DG);
 	end = clock();
 	time_taken = ((double) (end - start)) / CLOCKS_PER_SEC;
