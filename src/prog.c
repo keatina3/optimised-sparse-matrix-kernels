@@ -22,6 +22,7 @@ int main(int argc, char* argv[]){
 	mat_mar A, b, L;
 	real *x,*y;
 	dim i;
+	real SSE = 0;
 	clock_t start, end;
 	double time_taken;
 
@@ -42,13 +43,12 @@ int main(int argc, char* argv[]){
 	time_taken = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken: %lf\n", time_taken);
 	
-	for(i=0;i<L.m;i++)
+	for(i=0;i<L.m;i++){
+		SSE += (y[i]-x[i])*(y[i]-x[i]); 
 		if(fabs(y[i]-x[i]) > err)
 			printf("y[i] = %0.16lf, x[i] = %0.16lf\n",y[i],x[i]);	
+	}
 	
-	real SSE = 0;
-	for(i=0;i<L.m;i++)
-		SSE += (y[i]-x[i])*(y[i]-x[i]); 
 	printf("SSE = %lf\n",SSE);
 	
 	
