@@ -10,6 +10,8 @@
 
 #define err 1E-15
 
+int compare (const void * a, const void * b) {return ( *(int*)a - *(int*)b );}
+
 int main(int argc, char* argv[]){
 	//char* fileA = "../torso1/torso1.mtx";
 	//char* fileb = "../torso1/b_for_torso1.mtx";
@@ -51,22 +53,35 @@ int main(int argc, char* argv[]){
 	
 	SSE = 0;
 	if(myid==root){
+		/*
 		y = lsolve(&L, &b);
 		for(i=0;i<b.m;i++){
 			SSE += (x[i]-y[i])*(x[i]-y[i]); 
-			//if(fabs(x[i]-y[i]) > err)
-			//	printf("x[i] = %lf, y[i] = %lf\n",x[i],y[i]);
+			if(fabs(x[i]-y[i]) > err)
+				printf("x[i] = %0.16lf, y[i] = %0.16lf,col = %ld\n",x[i],y[i],i);
 		}
-	printf("SSE = %lf\n",SSE);
-	}
-	
-	free_mat(&L);
-	free_mat(&b);
-	if(myid==root){
+		printf("SSE = %0.16lf\n",SSE);
+		*/
+		dim* nzInd = (dim*)malloc(DG->reach.numElems*sizeof(dim));
+		node* tmp = DG->reach.tail;
+		i=0;
+		while(tmp!=NULL){
+				nzInd[i] = tmp->vertex;
+				tmp = tmp->prev;
+				i++;
+		}
+		qsort (nzInd, DG->reach.numElems, sizeof(dim), compare);
+		mat_mar xMM = ArrtoCCS(x,nzInd,b.m,DG->reach.numElems);
+		free(nzInd);
+		writeMM(&xMM,"x.mtx");
+
 		free_mat(&A);
+		free_mat(&xMM);
 		freeGraph(DG);
 		freeLevelSet(G);
 	}
+	free_mat(&L);
+	free_mat(&b);
 
 	MPI_Finalize();
 	return 0;

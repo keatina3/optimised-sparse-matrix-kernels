@@ -37,7 +37,7 @@ dim* assignCols(dim* colCount, int myid, int nprocs, int root, levelSet* G, dim 
 	if(myid == root){
 		setCard = G->level_ptr[level].numElems;
 	}
-	MPI_Bcast(&setCard,1,MPI_UNSIGNED_LONG,root,communicator);
+	MPI_Bcast(&setCard,1,MPI_DIM,root,communicator);
 	MPI_Barrier(communicator);
 	decomp1d(setCard, nprocs, myid, &s, &e);
 	*colCount = e-s+1;
@@ -59,7 +59,7 @@ dim* assignCols(dim* colCount, int myid, int nprocs, int root, levelSet* G, dim 
 					sendArr[j] = tmp->vertex;
 					tmp = tmp->prev;
 				}
-				MPI_Send(sendArr,sendCount,MPI_UNSIGNED_LONG,i,0,MPI_COMM_WORLD);
+				MPI_Send(sendArr,sendCount,MPI_DIM,i,0,MPI_COMM_WORLD);
 				free(sendArr);
 			} else {
 				break;
@@ -67,7 +67,7 @@ dim* assignCols(dim* colCount, int myid, int nprocs, int root, levelSet* G, dim 
 		}
 	} else {
 		if(*colCount>0){
-			MPI_Recv(colInd,*colCount,MPI_UNSIGNED_LONG,root,0,MPI_COMM_WORLD, &status);
+			MPI_Recv(colInd,*colCount,MPI_DIM,root,0,MPI_COMM_WORLD, &status);
 		}
 	}
 	return colInd;
@@ -75,9 +75,9 @@ dim* assignCols(dim* colCount, int myid, int nprocs, int root, levelSet* G, dim 
 
 void BcastMatrix(mat_mar* A, int myid, int root, MPI_Comm communicator){
 	MPI_Bcast(&A->head, 4, MPI_CHAR, root, communicator);
-	MPI_Bcast(&A->m, 1, MPI_UNSIGNED_LONG, root, communicator);
-	MPI_Bcast(&A->n, 1, MPI_UNSIGNED_LONG, root, communicator);
-	MPI_Bcast(&A->nz, 1, MPI_UNSIGNED_LONG, root, communicator);
+	MPI_Bcast(&A->m, 1, MPI_DIM, root, communicator);
+	MPI_Bcast(&A->n, 1, MPI_DIM, root, communicator);
+	MPI_Bcast(&A->nz, 1, MPI_DIM, root, communicator);
 	if(myid!=root){
 		A->dat = (real*)malloc(A->nz*sizeof(real));
 		if(is_sparse(A->head)){
@@ -87,19 +87,18 @@ void BcastMatrix(mat_mar* A, int myid, int root, MPI_Comm communicator){
 			A->arr = (real**)malloc(A->m*sizeof(real*));
 		}
 	}
-	MPI_Bcast(A->dat, A->nz, MPI_DOUBLE, root, communicator);
+	MPI_Bcast(A->dat, A->nz, MPI_REAL_TYPE, root, communicator);
 	if(is_sparse(A->head)){
-		MPI_Bcast(A->I, A->nz, MPI_UNSIGNED_LONG, root, communicator);
-		MPI_Bcast(A->J, 1+A->m, MPI_UNSIGNED_LONG, root, communicator);
+		MPI_Bcast(A->I, A->nz, MPI_DIM, root, communicator);
+		MPI_Bcast(A->J, 1+A->m, MPI_DIM, root, communicator);
 	} else
-		MPI_Bcast(A->arr, A->m, MPI_DOUBLE, root, communicator);
+		MPI_Bcast(A->arr, A->m, MPI_REAL_TYPE, root, communicator);
 }
 
 void levelSync(mat_mar* L, real* x, levelSet* G, dim level, dim colCount, int myid, int root, MPI_Comm comm){
 	node* tmp;
 	dim i;
 	MPI_Status stat;
-	MPI_Request request;
 	dim col;
 	real localsum;
 
@@ -109,13 +108,13 @@ void levelSync(mat_mar* L, real* x, levelSet* G, dim level, dim colCount, int my
 			tmp = tmp->prev;
 		while(tmp!=NULL){
 			col = tmp->vertex;
-			MPI_Recv(&x[col],1,MPI_DOUBLE,MPI_ANY_SOURCE,col,comm,&stat);
+			MPI_Recv(&x[col],1,MPI_REAL_TYPE,MPI_ANY_SOURCE,col,comm,&stat);
 			for(i=L->J[col]+1;i<L->J[col+1];i++){
-				MPI_Recv(&localsum,1,MPI_DOUBLE,MPI_ANY_SOURCE,L->I[i],comm,&stat);
+				MPI_Recv(&localsum,1,MPI_REAL_TYPE,MPI_ANY_SOURCE,L->I[i],comm,&stat);
 				x[L->I[i]] += localsum;
 			}
 			tmp = tmp->prev;
 		}
 	}
-	MPI_Bcast(x,L->m,MPI_DOUBLE,root,comm);
+	MPI_Bcast(x,L->m,MPI_REAL_TYPE,root,comm);
 }

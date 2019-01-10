@@ -168,11 +168,82 @@ mat_mar init_mat(char* file){
 	return A;
 }
 
+bool writeMM(mat_mar* A, char* filename){
+	if(is_sparse(A->head))
+		writeCCS(A,filename);
+	else
+		printf("Writing dense format not complete\n");
+	
+	printf("Succesfull writing to file.\n");
+	printf("Matrix type: %c%c%c%c\n",A->head[0],A->head[1],A->head[2],A->head[3]);
+	printf("Dimensions: %lu, %lu\n",A->m,A->n);
+	printf("Non-zero elements: %lu\n\n\n",A->nz);
+
+	return 1;
+}
+
+bool writeCCS(mat_mar* A, char* filename){
+	A->file = fopen(filename,"w");
+	if(A->file == NULL)
+		printf("\nCould not open file %s\n\n",filename);
+	else{
+		printf("\nFile opened succesfully:\n");
+		printf("%s\n\n",filename);
+	}
+
+	fprintf(A->file, "%s ", MatrixMarketBanner);
+    fprintf(A->file, "%s\n", mm_typecode_to_str(A->head));
+	
+	fprintf(A->file, "%lu %lu %lu\n",A->m, A->n, A->nz);    /* print values */
+   	
+	dim i;
+	if (is_pattern(A->head)){
+    	for (i=0; i<A->nz; i++)
+	    	fprintf(A->file, "%lu %lu\n", 1+A->I[i], A->J[i]);
+	} else if (is_real(A->head)){
+     	for (i=0; i<A->nz; i++){
+    	   	fprintf(A->file, "%lu %lu %20.16g\n", 1+A->I[i], 1, A->dat[i]);
+		}
+    } else if (is_complex(A->head)){
+        for (i=0; i<A->nz; i++)
+       		fprintf(A->file, "%lu %lu %20.16g %20.16g\n", 1+A->I[i], A->J[i], A->dat[2*i],A->dat[2*i+1]);
+	}
+
+	return 1;
+}
+
 bool CCSvectoArr(mat_mar* b, real* x){
 	dim i;
 	for(i=0;i<b->nz;i++)
 		x[b->I[i]] = b->dat[i];
 	return 1;
+}
+
+mat_mar ArrtoCCS(real* x, dim* nzInd, dim m, dim nz){
+	mat_mar A;
+	
+	A.nz = nz;
+	A.m = m;
+	A.n = 1;
+	
+	A.head[0]='M';
+	A.head[1]='C';
+	A.head[2]='R';
+	A.head[3]='G';
+	
+	A.dat = (real*)malloc(A.nz*sizeof(real));
+	A.I = (dim*)malloc(A.nz*sizeof(dim));
+	A.J = (dim*)malloc(((A.n)+1)*sizeof(dim));
+	
+	dim i = 0;
+	for(i=0;i<nz;i++){
+		A.dat[i] = x[nzInd[i]];
+		A.I[i] = nzInd[i];
+	}
+	A.J[0] = 0;
+	A.J[1] = nz;
+
+	return A;
 }
 
 mat_mar getLvals(mat_mar* A){
@@ -223,4 +294,57 @@ void free_mat(mat_mar* A){
 	}
 	else
 		free(A->arr);
+}
+
+char *mm_strdup(const char *s){
+	int len = strlen(s);
+	char *s2 = (char *) malloc((len+1)*sizeof(char));
+	return strcpy(s2, s);
+}
+
+char  *mm_typecode_to_str(char* header){
+	char buffer[MM_MAX_LINE_LENGTH];
+	char *types[4];
+	char *mm_strdup(const char *);
+
+
+    /* check for MTX type */
+	if (is_matrix(header))
+		types[0] = MATRIX;
+
+    /* check for CRD or ARR matrix */
+	if (is_sparse(header))
+    	types[1] = SPARSE;
+	else if (is_dense(header))
+		types[1] = DENSE;
+	else
+    	return NULL;
+
+    /* check for element data type */
+	if (is_real(header))
+    	types[2] = REAL;
+	else if (is_complex(header))
+        types[2] = COMPLEX;
+    else if (is_pattern(header))
+        types[2] = PATT;
+    else if (is_integer(header))
+    	types[2] = INT;
+	else
+    	return NULL;
+
+
+    /* check for symmetry type */
+	if (is_general(header))
+		types[3] = GENERAL;
+	else if (is_symmetric(header))
+		types[3] = SYMM;
+	else if (is_hermitian(header))
+		types[3] = HERMIT;
+    else if (is_skew(header))
+		types[3] = SKEW;
+	else
+		return NULL;
+
+	sprintf(buffer,"%s %s %s %s", types[0], types[1], types[2], types[3]);
+	return mm_strdup(buffer);
 }

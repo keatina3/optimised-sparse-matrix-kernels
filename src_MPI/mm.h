@@ -4,6 +4,8 @@
 #define MM_MAX_LINE_LENGTH 1025
 #define MatrixMarketBanner "%%MatrixMarket"
 #define MM_MAX_TOKEN_LENGTH 64
+#define MPI_REAL_TYPE MPI_DOUBLE
+#define MPI_DIM MPI_UNSIGNED_LONG
 
 typedef unsigned long dim;
 typedef double real;
@@ -30,9 +32,14 @@ bool read_mm_data(mat_mar* A);
 bool read_CCS(mat_mar* A);
 bool read_arr(mat_mar* A);
 mat_mar init_mat(char* file);
+bool writeMM(mat_mar* A, char* filename);
+bool writeCCS(mat_mar* A, char* filename);
 bool CCSvectoArr(mat_mar* b, real* x);
+mat_mar ArrtoCCS(real* x, dim* nzInd, dim m, dim nz);
 mat_mar getLvals(mat_mar* A);
 void free_mat(mat_mar* A);
+char *mm_strdup(const char* s);
+char *mm_typecode_to_str(char* header);
 
 
 #define is_matrix(header)		((header)[0]=='M')
