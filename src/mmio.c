@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "mmio.h"
 
+// reads header information from .mtx file. Outputs into MM struct into "head" variable as 4 character code //
 bool read_mm_head(mat_mar* A){
 	char buffer[MM_MAX_LINE_LENGTH];
 	char banner[MM_MAX_TOKEN_LENGTH];
@@ -33,8 +34,7 @@ bool read_mm_head(mat_mar* A){
 	A->head[0]='M';
 
     /* second field describes whether this is a sparse matrix (in coordinate
-            storgae) or a dense array */
-
+            storgae) or dense (array) */
 
 	if(strcmp(crd, SPARSE) == 0)
 		A->head[1]='C';
@@ -44,7 +44,7 @@ bool read_mm_head(mat_mar* A){
 		return 0;
     
 
-    /* third field */
+    /* third field  describes type of data. real, complex, pattern or integer */
 
 	if(strcmp(data_type, REAL) == 0)
 		A->head[2]='R';
@@ -58,7 +58,7 @@ bool read_mm_head(mat_mar* A){
 		return 0;
     
 
-    /* fourth field */
+    /* fourth field describes structure. general, symmetrical, hermitian */
 
 	if(strcmp(storage_scheme, GENERAL) == 0)
 		A->head[3]='G';
@@ -74,6 +74,7 @@ bool read_mm_head(mat_mar* A){
 	return 1;
 }
 
+// reads matrix size information from .mtx file //
 bool read_mm_size(mat_mar* A){
 	char buffer[MM_MAX_LINE_LENGTH];
 	
@@ -84,12 +85,12 @@ bool read_mm_size(mat_mar* A){
 		if(fgets(buffer,MM_MAX_LINE_LENGTH,A->file) == NULL) 
 			return 0;
 	}	while(buffer[0] == '%');
-	if(A->head[1]=='C'){
-		if(sscanf(buffer, "%lu %lu %lu", &A->m, &A->n, &A->nz) == 3){
+	if(is_sparse(A->head)){
+		if(sscanf(buffer, "%lu %lu %lu", &A->m, &A->n, &A->nz) == 3){	// if sparse, read M,N and Nnz
 			return 1;
 		}
 	} else{
-		if(sscanf(buffer, "%lu %lu", &A->m, &A->n) == 2){
+		if(sscanf(buffer, "%lu %lu", &A->m, &A->n) == 2){				// else if dense, read M,N
 			A->nz = (A->m) * (A->n);
 			return 1;
 		}
@@ -97,41 +98,46 @@ bool read_mm_size(mat_mar* A){
 	return 0;
 }
 
+// general fn to assign how to read data from .mtx, depending on if dense/sparse //
 bool read_mm_data(mat_mar* A){
-	if(is_real(A->head) && is_sparse(A->head))
+	if(is_real(A->head) && is_sparse(A->head))	// is sparse & real
 		return read_CCS(A);
-	else if(is_real(A->head) && is_dense(A->head))
+	else if(is_real(A->head) && is_dense(A->head))	// if dense & real
 		return read_arr(A);
+	//	scope here to write code for other forms, complex & dense etc.
 	return 0;
 }
 
+// read data from sparse matrix file //
 bool read_CCS(mat_mar* A){
 	dim i,tmp1,tmp2;
 	dim count1 = 0, count2 = 0;
 
-	A->dat = (real *) malloc((A->nz)*sizeof(real));
-	A->I = (dim *) malloc((A->nz)*sizeof(dim));
-	A->J = (dim *) malloc(((A->n) +1)*sizeof(dim));
+	// allocating memory for CCS format //
+	A->dat = (real *) malloc((A->nz)*sizeof(real));		// Lx or data array
+	A->I = (dim *) malloc((A->nz)*sizeof(dim));			// Li or row index
+	A->J = (dim *) malloc(((A->n) +1)*sizeof(dim));		// Lp or column pointer
 
-	for (i=0; i<(A->nz); i++){
-		fscanf(A->file, "%lu %lu %lf\n", &(A->I)[i], &tmp1, &(A->dat)[i]);
-		(A->I)[i]--;
-		if(tmp1 != tmp2){
+	for (i=0; i<(A->nz); i++){		// from 0 to #nonZeros
+		fscanf(A->file, "%lu %lu %lf\n", &(A->I)[i], &tmp1, &(A->dat)[i]);	// reading each column
+		(A->I)[i]--;				// reducing as file starts at 1 not 0
+		if(tmp1 != tmp2){			// once col changes, assign count to J
 			(A->J)[count2] = count1;
 			count2++;
 			tmp2 = tmp1;
 		}
 		count1++;
 	}
-	A->J[A->n] = A->nz;
+	A->J[A->n] = A->nz;			// final value in row pointer array
 	return 1;
 }
 
+// reading mtx in array format //
 bool read_arr(mat_mar* A){
 	dim i,j;
-
-	A->dat = (real *) malloc((A->m) * (A->n)  * sizeof(real));
-	A->arr = (real **)malloc((A->m) * sizeof(real*));
+	
+	A->dat = (real *) malloc((A->m) * (A->n)  * sizeof(real));		// array of data
+	A->arr = (real **)malloc((A->m) * sizeof(real*));				// 2d array for row ptrs
 	for(i=0;i<(A->m);i++){
 		A->arr[i] = &(A->dat[i*(A->n)]); 
 		for(j=0;j<(A->n);j++){
@@ -142,6 +148,7 @@ bool read_arr(mat_mar* A){
 	return 1;
 }
 
+// intialising matrix data structure with data from file //
 mat_mar init_mat(char* file){
 	mat_mar A;
 
@@ -160,6 +167,7 @@ mat_mar init_mat(char* file){
 	if(!read_mm_data(&A))
 		printf("Error reading data!\n");
 	
+	// printing out matrix information //
 	printf("Matrix type: %c%c%c%c\n",A.head[0],A.head[1],A.head[2],A.head[3]);
 	printf("Dimensions: %lu, %lu\n",A.m,A.n);
 	printf("Non-zero elements: %lu\n\n\n",A.nz);
@@ -168,10 +176,11 @@ mat_mar init_mat(char* file){
 	return A;
 }
 
+// general fn to assign how to write  matrix struct A to mtx file //
 bool writeMM(mat_mar* A, char* filename){
-	if(is_sparse(A->head))
+	if(is_sparse(A->head))				// if in CCS format
 		writeCCS(A,filename);
-	else
+	else								// scope for writing fns to output in other formats, depending on Matrix header
 		printf("Writing dense format not complete\n");
 	
 	printf("Succesful writing to file.\n");
@@ -182,6 +191,7 @@ bool writeMM(mat_mar* A, char* filename){
 	return 1;
 }
 
+// writes CCS to file //
 bool writeCCS(mat_mar* A, char* filename){
 	A->file = fopen(filename,"w");
 	if(A->file == NULL)
@@ -194,14 +204,14 @@ bool writeCCS(mat_mar* A, char* filename){
 	fprintf(A->file, "%s ", MatrixMarketBanner);
     fprintf(A->file, "%s\n", mm_typecode_to_str(A->head));
 	
-	fprintf(A->file, "%lu %lu %lu\n",A->m, A->n, A->nz);    /* print values */
+	fprintf(A->file, "%lu %lu %lu\n",A->m, A->n, A->nz);
    	
 	dim i;
 	if (is_pattern(A->head)){
     	for (i=0; i<A->nz; i++)
 	    	fprintf(A->file, "%lu %lu\n", 1+A->I[i], A->J[i]);
 	} else if (is_real(A->head)){
-     	for (i=0; i<A->nz; i++){
+     	for (i=0; i<A->nz; i++){							// writing real & sparse to file
     	   	fprintf(A->file, "%lu %u %20.16g\n", 1+A->I[i], 1, A->dat[i]);
 		}
     } else if (is_complex(A->head)){
@@ -212,6 +222,7 @@ bool writeCCS(mat_mar* A, char* filename){
 	return 1;
 }
 
+// converting CCS to general array format. Will be needed for Lsolve //
 bool CCSvectoArr(mat_mar* b, real* x){
 	dim i;
 	for(i=0;i<b->nz;i++)
@@ -219,41 +230,49 @@ bool CCSvectoArr(mat_mar* b, real* x){
 	return 1;
 }
 
+// converting 1d array back to CCS format. To be used for outputting x to file later //
 mat_mar ArrtoCCS(real* x, dim* nzInd, dim m, dim nz){
 	mat_mar A;
-	
+
+	// intialising values for dimensions //
 	A.nz = nz;
 	A.m = m;
 	A.n = 1;
 	
+	// assigning struct as CCS i.e. matrix, sparse, real, general //
 	A.head[0]='M';
 	A.head[1]='C';
 	A.head[2]='R';
 	A.head[3]='G';
 	
+	// allocating memory for data, row index, col pointer //
 	A.dat = (real*)malloc(A.nz*sizeof(real));
 	A.I = (dim*)malloc(A.nz*sizeof(dim));
 	A.J = (dim*)malloc(((A.n)+1)*sizeof(dim));
 	
+	// assinging vals to dat and row index
 	dim i = 0;
 	for(i=0;i<nz;i++){
 		A.dat[i] = x[nzInd[i]];
 		A.I[i] = nzInd[i];
 	}
+	// col ptr vals //
 	A.J[0] = 0;
 	A.J[1] = nz;
 
 	return A;
 }
 
+// fn to remove upper triangular U elements from matrix A //
 mat_mar getLvals(mat_mar* A){
 	dim count = 0;
 	dim i,j;
 	mat_mar L;
 
+	// counting # elems in lower triangular for allocating memory //
 	for(i=0;i<A->n;i++)
 		for(j = (A->J)[i]; j < (A->J)[i+1]; j++)
-			if( A->I[j] >= i)
+			if( A->I[j] >= i)			// if col <= row ==> Lower or diag
 				count++;
 	
 	for(i=0;i<4;i++)
@@ -265,6 +284,7 @@ mat_mar getLvals(mat_mar* A){
 	L.I = (dim*)malloc(count*sizeof(dim));
 	L.J = (dim*)malloc(((L.m)+1)*sizeof(dim));
 	
+	// iterating through, assigning new values if col <= row //
 	count = 0;
 	for(i=0;i<L.n;i++){
 		L.J[i] = count;
@@ -286,13 +306,14 @@ mat_mar getLvals(mat_mar* A){
 	return L;
 }
 
+// free up all allocated memory to matrix structure //
 void free_mat(mat_mar* A){
 	free(A->dat);
 	if(is_sparse(A->head)){
 		free(A->I);
 		free(A->J);
 	}
-	else
+	else			// if dense
 		free(A->arr);
 }
 
@@ -302,6 +323,7 @@ char *mm_strdup(const char *s){
 	return strcpy(s2, s);
 }
 
+// converts matrix header code into strings //
 char  *mm_typecode_to_str(char* header){
 	char buffer[MM_MAX_LINE_LENGTH];
 	char *types[4];

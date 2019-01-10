@@ -3,29 +3,32 @@
 #include "mmio.h"
 #include "DAG.h"
 
+// create a new node in reachset //
 node* createNode(dim v){
 	node* newNode = (node*)malloc(sizeof(node));
 	if(!newNode)
 		printf("Error creating node\n");
 		
-	newNode->vertex = v;
-	newNode->next = NULL;
+	newNode->vertex = v;	// vertex representing col number
+	newNode->next = NULL;	// 2 direction linked list
 	newNode->prev = NULL;
 
 	return newNode;
 }
 
+// intialise graph to represent directed acyclic graph for the dependencies //
 Graph* createGraph(dim n){
 	Graph* graph = (Graph*)malloc(sizeof(Graph));
 	if(!graph)
 		printf("Error allocating DAG.\n");
 	
-	graph->visited = (bool*)calloc(n,sizeof(bool));
+	graph->visited = (bool*)calloc(n,sizeof(bool));	// boolean array representing if DFS has touched node or not	
 	graph->reach.head = NULL;
-	graph->reach.tail = graph->reach.head;
+	graph->reach.tail = graph->reach.head;			//start at tail, since DFS fn appends in reverse order
 	return graph;
 }
 
+// free all allocated memory from the DAG //
 void freeGraph(Graph* graph){
 	if(graph){
 		node* reachPtr = graph->reach.head;
@@ -39,36 +42,39 @@ void freeGraph(Graph* graph){
 	free(graph);
 }
 
+// appending node/element to the reachset //
 void appendSet(reachset* reach, dim vertex){
 	node* newNode = createNode(vertex);
 	node* old = reach->tail;
     
-	if(reach->head == NULL){
+	if(reach->head == NULL){	// if Nullset
     	reach->head = newNode;
     	old = reach->head;
 	}
 
+	// reassinging values and adding new node to tail //
 	newNode->next = NULL;
 	newNode->prev = old;
 	old->next = newNode;
 	reach->tail = newNode;
 	reach->head->prev = NULL;
-	reach->numElems++;
+	reach->numElems++;			// numElems to be used later when cardinality of reachset needed
 }
 
-void DFS(mat_mar* L, Graph* graph, dim vertex, dim count) {
-	graph->visited[vertex] = 1;
-	count++;
+// depth first search functionality //
+void DFS(mat_mar* L, Graph* graph, dim vertex) {
+	graph->visited[vertex] = 1;		// set node to visited
 	dim i;
-	for(i = (L->J[vertex]+1); i < L->J[vertex+1]; i++){
+	for(i = (L->J[vertex]+1); i < L->J[vertex+1]; i++){			// looping through all dependencies of 'vertex'. Using matrix as a DAG.
 		if(graph->visited[L->I[i]] == 0){
-			DFS(L, graph, L->I[i], count);
+			DFS(L, graph, L->I[i], count);						// recursive. Do if not visited.
 		}
 	}
-	appendSet(&graph->reach, vertex);
+	appendSet(&graph->reach, vertex);			// once fn has recusively worked its way throug all child nodes, add node to reachset.
 }
 
-Graph* getReach(mat_mar* L, mat_mar* b){
+// gets reachset in topological order //
+Graph* getReach(mat_mar* L, mat_mar* b){		// apply DFS for all relevant entry nodes to get reachset.
 	Graph* graph = createGraph(L->n);
 	dim i;
 	graph->reach.numElems = 0;

@@ -1,30 +1,40 @@
 #ifndef MM_H
 #define MM_H
 
+// ----------------------------------------------------------------------------------//
+// INPUT/OUTPUT/MANIPULATION FUNCTIONALITY & DATA STRUCTURES FOR MATRIX MARKET FILES //
+// --------------------------------------------------------------------------------- //
+
+
 #define MM_MAX_LINE_LENGTH 1025
 #define MatrixMarketBanner "%%MatrixMarket"
 #define MM_MAX_TOKEN_LENGTH 64
-#define MPI_REAL_TYPE MPI_DOUBLE
-#define MPI_DIM MPI_UNSIGNED_LONG
 
-typedef unsigned long dim;
-typedef double real;
+
+// DATA STRUCTURES //
+
+typedef unsigned long dim;		// represents dimensionality of matrices. Can be changed to Int or long long depending.
+typedef double real;			// represents type of data in matrix. Can be changed to float etc.
 typedef int bool;
-typedef char header;
+typedef char header;			// char[4] filetype for matrix header
+
+// matrix market data structure //
 typedef struct
 {
 	FILE	*file;
-	header	head[4];
-	dim		m;
-	dim		n;
-	dim		nz;
-	real	**arr;
-	real	*dat;
-	dim		*I;
-	dim		*J;
+	header	head[4];			// contains header code
+	dim		m;					// row count
+	dim		n;					// col count
+	dim		nz;					// #nonzeros
+	real	**arr;				// 2d array ptr for dense format
+	real	*dat;				// 1d array for data
+	dim		*I;					// Ai or row ptr for CCS format
+	dim		*J;					// Ap or col ptr for CCS format
 }
 mat_mar;
 
+
+// FUNCTIONS //
 
 bool read_mm_head(mat_mar* A);
 bool read_mm_size(mat_mar* A);
@@ -41,6 +51,8 @@ void free_mat(mat_mar* A);
 char *mm_strdup(const char* s);
 char *mm_typecode_to_str(char* header);
 
+
+// BOOLEAN TESTS RELATING TO MATRIX HEADER //
 
 #define is_matrix(header)		((header)[0]=='M')
 
@@ -60,6 +72,7 @@ char *mm_typecode_to_str(char* header);
 #define is_hermitian(header)	((header)[3]=='H')
 
 
+// STRING DEFINITIONS FOR MATRIX HEADER CODE //
 
 #define MATRIX	"matrix"
 
