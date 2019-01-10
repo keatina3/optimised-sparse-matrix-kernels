@@ -32,4 +32,4 @@ testDense: prog
 
 .PHONY: clean test
 clean:
-	$(RM) $(objects)
+	$(RM) $(objects) x.mtx prog

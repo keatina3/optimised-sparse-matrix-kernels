@@ -35,13 +35,17 @@ int main(int argc, char* argv[]){
 	A = init_mat(fileA);
 	b = init_mat(fileb);
 	L = getLvals(&A);
-
+	
+	// ROUTINES //
+	
+	/* serial code */
 	start = clock();
 	x = lsolve(&L, &b);
 	end = clock();
 	time_taken = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken: %lf\n", time_taken);
 	
+	/* Gilbert-Meierls */
 	start = clock();
 	Graph* DG = getReach(&L, &b);
 	y = lsolve_GP(&L, &b, DG);
@@ -49,22 +53,18 @@ int main(int argc, char* argv[]){
 	time_taken = ((double) (end - start)) / CLOCKS_PER_SEC;
 	printf("Time taken: %lf\n", time_taken);
 	
+
+	// VERIFICATION //
+
 	for(i=0;i<L.m;i++){
 		SSE += (y[i]-x[i])*(y[i]-x[i]); 
 		if(fabs(y[i]-x[i]) > err)
 			printf("y[i] = %0.16lf, x[i] = %0.16lf\n",y[i],x[i]);	
 	}
+	printf("SSE = %0.16lf\n",SSE);
 	
-	printf("SSE = %lf\n",SSE);
-	
-	
-	dim count = 0;
-	node* tmp = DG->reach.tail;
-	while(tmp!=NULL){
-		count++;
-		tmp = tmp->prev;
-	}
-	printf("Count = %lu\n",count);	
+
+	// FREE DATA //
 
 	freeGraph(DG);
 	free_mat(&A);

@@ -21,6 +21,8 @@ int main(int argc, char* argv[]){
 	levelSet* G;
 	Graph* DG;
 	dim i;
+	clock_t start, end;
+	double time_taken;
 	char* fileA;
 	char* fileb;
 	int option = 0;
@@ -41,6 +43,8 @@ int main(int argc, char* argv[]){
 	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 	
+	// READING IN DATA & GENERATING DEPENDENCIES //
+
 	if(myid==root){
 		A = init_mat(fileA);
 		L = getLvals(&A);
@@ -49,26 +53,34 @@ int main(int argc, char* argv[]){
 		G = assignLevelSet(DG);
 	}
 	
-	// INSERT DATA DISPERSION HERE //
+	// DATA DISPERSION //
 	
 	BcastMatrix(&L, myid, root, MPI_COMM_WORLD);
 	BcastMatrix(&b, myid, root, MPI_COMM_WORLD);
 
-	// INSERT ROUTINES HERE //
+	// ROUTINES //
 	
+	start = clock();
 	x = lsolve_Par(&L, &b, G, myid, nprocs, root, MPI_COMM_WORLD);
-	
+	end = clock();
+	time_taken = ((double)(end-start))/CLOCKS_PER_SEC;
+
+	// VERIFICATION //
+
 	SSE = 0;
 	if(myid==root){
-		/*
+		
 		y = lsolve(&L, &b);
 		for(i=0;i<b.m;i++){
 			SSE += (x[i]-y[i])*(x[i]-y[i]); 
-			if(fabs(x[i]-y[i]) > err)
-				printf("x[i] = %0.16lf, y[i] = %0.16lf,col = %ld\n",x[i],y[i],i);
+			//if(fabs(x[i]-y[i]) > err)
+			//	printf("x[i] = %0.16lf, y[i] = %0.16lf,col = %ld\n",x[i],y[i],i);
 		}
 		printf("SSE = %0.16lf\n",SSE);
-		*/
+		
+
+	// OUTPUTTING RESULTS //
+
 		dim* nzInd = (dim*)malloc(DG->reach.numElems*sizeof(dim));
 		node* tmp = DG->reach.tail;
 		i=0;
@@ -81,6 +93,8 @@ int main(int argc, char* argv[]){
 		mat_mar xMM = ArrtoCCS(x,nzInd,b.m,DG->reach.numElems);
 		free(nzInd);
 		writeMM(&xMM,"x.mtx");
+
+	// FREE DATA //
 
 		free_mat(&A);
 		free_mat(&xMM);
