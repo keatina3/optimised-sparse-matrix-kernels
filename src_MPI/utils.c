@@ -38,7 +38,6 @@ dim* assignCols(dim* colCount, int myid, int nprocs, int root, levelSet* G, dim 
 		setCard = G->level_ptr[level].numElems;
 	}
 	MPI_Bcast(&setCard,1,MPI_DIM,root,communicator);
-	MPI_Barrier(communicator);
 	decomp1d(setCard, nprocs, myid, &s, &e);
 	*colCount = e-s+1;
 	if(*colCount>0)
