@@ -23,12 +23,14 @@ real* lsolve(mat_mar* L, mat_mar* b){
 	return x;
 }
 
+
 real* lsolve_Par(mat_mar* L, mat_mar* b, levelSet* G, int myid, int nprocs, int root, MPI_Comm comm){
 	dim i, j, k;
 	dim colCount, col, *colIndex;
 	real* x;
+	real localsum;
 	dim numLevels;
-	MPI_Request* request;
+	MPI_Request request;
 	if(!L || !b)
 		return NULL;
 
@@ -45,15 +47,28 @@ real* lsolve_Par(mat_mar* L, mat_mar* b, levelSet* G, int myid, int nprocs, int 
 		for(j=0;j<colCount;j++){
 			col = colIndex[j];
 			x[col] /= L->dat[L->J[col]];
-			for(k = L->J[col]+1; k < L->J[col+1]; k++){
-				x[L->I[k]] -= L->dat[k] * x[col];
+			if(myid!=root){
+				//printf("Sending x[%lu]\n",1+col);
+				MPI_Isend(&x[col],1,MPI_DOUBLE,root,col,comm,&request);
 			}
-			//MPI_Bcast(&x[col],1,MPI_DOUBLE,myid,comm);
-			//MPI_Ibcast(&x[j],1,MPI_DOUBLE,myid,comm,&request[j]);
+			for(k = L->J[col]+1; k < L->J[col+1]; k++){
+				//x[L->I[k]] -= L->dat[k] * x[col];
+				localsum = - (L->dat[k] * x[col]);
+				if(myid!=root){
+					//printf("col = %lu, level = %lu, row = %lu\n",col,i,L->I[k]);
+					//printf("Sending x[%lu]\n",1+L->I[k]);
+					MPI_Isend(&localsum,1,MPI_DOUBLE,root,L->I[k],comm,&request);
+					//MPI_Isend(&x[L->I[k]],1,MPI_DOUBLE,root,L->I[k],comm,&request);
+				}
+				else
+					x[L->I[k]] += localsum;
+			}
 		}
+		levelSync(L,x,G,i,colCount,myid,root,comm);
+		//MPI_Barrier(comm);
 		if(colCount>0)
 			free(colIndex);
-		//MPI_Waitsome(L->m,request,colCount,colInd,stat);
 	}
 	return x;
 }
+

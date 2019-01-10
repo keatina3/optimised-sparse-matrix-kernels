@@ -95,19 +95,27 @@ void BcastMatrix(mat_mar* A, int myid, int root, MPI_Comm communicator){
 		MPI_Bcast(A->arr, A->m, MPI_DOUBLE, root, communicator);
 }
 
-void levelSync(mat_mar* L, real* x, levelSet* G, dim level, int myid, int root, MPI_Comm comm){
+void levelSync(mat_mar* L, real* x, levelSet* G, dim level, dim colCount, int myid, int root, MPI_Comm comm){
 	node* tmp;
-	dim k;
+	dim i;
 	MPI_Status stat;
+	MPI_Request request;
 	dim col;
+	real localsum;
+
 	if(myid==root){
-		tmp = G->level_ptr[level].head;
-		while(tmp){
+		tmp = G->level_ptr[level].tail;
+		for(i=0;i<colCount;i++)
+			tmp = tmp->prev;
+		while(tmp!=NULL){
 			col = tmp->vertex;
 			MPI_Recv(&x[col],1,MPI_DOUBLE,MPI_ANY_SOURCE,col,comm,&stat);
-			for(k=L->J[col]+1;k<L->J[col+1];k++)
-				MPI_Recv(&x[L->I[k]],1,MPI_DOUBLE,MPI_ANY_SOURCE,L->I[k],comm,&stat);
+			for(i=L->J[col]+1;i<L->J[col+1];i++){
+				MPI_Recv(&localsum,1,MPI_DOUBLE,MPI_ANY_SOURCE,L->I[i],comm,&stat);
+				x[L->I[i]] += localsum;
+			}
+			tmp = tmp->prev;
 		}
-	MPI_Bcast(x,L->m,MPI_DOUBLE,root,comm);
 	}
+	MPI_Bcast(x,L->m,MPI_DOUBLE,root,comm);
 }
