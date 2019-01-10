@@ -33,6 +33,7 @@ dim* assignCols(dim* colCount, int myid, int nprocs, int root, levelSet* G, dim 
 	dim* colInd;
 	int i,j;
 	MPI_Status status;
+	MPI_Request request;
 	dim setCard;
 	if(myid == root){
 		setCard = G->level_ptr[level].numElems;
@@ -58,7 +59,7 @@ dim* assignCols(dim* colCount, int myid, int nprocs, int root, levelSet* G, dim 
 					sendArr[j] = tmp->vertex;
 					tmp = tmp->prev;
 				}
-				MPI_Send(sendArr,sendCount,MPI_DIM,i,0,MPI_COMM_WORLD);
+				MPI_Isend(sendArr,sendCount,MPI_DIM,i,0,MPI_COMM_WORLD,&request);
 				free(sendArr);
 			} else {
 				break;
