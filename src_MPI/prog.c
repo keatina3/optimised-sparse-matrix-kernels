@@ -9,55 +9,61 @@
 #include "routines.h"
 #include "utils.h"
 
-#define err 1E-10
+#define err 1E-10	// tolerance level of check for accuracy
 
+// fn to be used for reordering output for printing to file //
 int compare (const void * a, const void * b) {return ( *(int*)a - *(int*)b );}
 
 int main(int argc, char* argv[]){
-	int myid, nprocs, root = 0;
-	mat_mar A,L,b;
-	real *x,*y;
-	real SSE;
-	levelSet* G;
-	Graph* DG;
-	dim i;
+	int myid, nprocs, root = 0;	// proc ID, number procs, root proc
+	mat_mar A,L,b;			// matrix structures
+	real *x,*y;			// array for results of  serial & parallel code for comp
+	real SSE;			// sum square error
+	levelSet* G;			// declaring levelset
+	Graph* DG;			// DAG
+	dim i;			
 	clock_t start, end;
 	double time_taken;
-	char* fileA;
-	char* fileb;
+	char* fileA;			// matrix file
+	char* fileb;			// RHS
 	int option = 0;
-
+	
+	// taking fileA address & fileb address from user input params in bash //
 	while ((option = getopt(argc, argv,"L:b:")) != -1) {
-    	switch (option) {
-        	case 'L' : fileA = optarg;
-    		    break;
-        	case 'b' : fileb = optarg;
-            	break;
+    		switch (option) {
+        		case 'L' : fileA = optarg;
+    		    		break;
+        		case 'b' : fileb = optarg;
+            			break;
 			default:
-      			printf("Option incorrect\n");
-      			return 1;
+      				printf("Option incorrect\n");
+      				return 1;
 		}
 	}
 	
+	// intialising MPI state //
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+	
 	
 	// READING IN DATA & GENERATING DEPENDENCIES //
 
 	if(myid==root){
 		A = init_mat(fileA);
-		L = getLvals(&A);
+		L = getLvals(&A);		// lower triangular version of A if necessary
 		b = init_mat(fileb);
-		DG = getReach(&L, &b);
-		G = assignLevelSet(DG);
+		DG = getReach(&L, &b);		// getting reachset
+		G = assignLevelSet(DG);		// assinging levelset
 	}
 	
 	// DATA DISPERSION //
 	
+	// broadcasting matrix data to all threads //
 	BcastMatrix(&L, myid, root, MPI_COMM_WORLD);
 	BcastMatrix(&b, myid, root, MPI_COMM_WORLD);
 
+	
 	// ROUTINES //
 	
 	start = clock();
@@ -67,7 +73,8 @@ int main(int argc, char* argv[]){
 	printf("Time taken: %lf, Nprocs = %d\n",time_taken,nprocs);
 
 	// VERIFICATION //
-
+	
+	// same as in serial code, using SSE and abs(diff)> tolerance as verification checks //
 	SSE = 0;
 	if(myid==root){
 		y = lsolve(&L, &b);
@@ -79,8 +86,8 @@ int main(int argc, char* argv[]){
 		printf("SSE = %0.16lf\n",SSE);
 		
 
-	// OUTPUTTING RESULTS //
-
+	// OUTPUTTING RESULTS TO FILE //
+		
 		dim* nzInd = (dim*)malloc(DG->reach.numElems*sizeof(dim));
 		node* tmp = DG->reach.tail;
 		i=0;
@@ -105,7 +112,8 @@ int main(int argc, char* argv[]){
 	}
 	free_mat(&L);
 	free_mat(&b);
-
+	
+	// ending MPI state //
 	MPI_Finalize();
 	return 0;
 }

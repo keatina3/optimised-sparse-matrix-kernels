@@ -1,6 +1,13 @@
 #ifndef _DAG_H_
 #define _DAG_H_
 
+//--------------------------------------------------------------------------------//
+// VARIOUS FUNCTIONALITY RELATING TO DIRECTED ACYCLIC GRAPH, REACHSET & LEVELSETS //
+//--------------------------------------------------------------------------------//
+
+// DATA STRUCTURES //
+
+// nodes for reachset/levelsets //
 typedef struct node
 {
 	dim vertex;               
@@ -9,6 +16,7 @@ typedef struct node
 }
 node;
 
+// linked list for reachset/ each level in levelset //
 typedef struct reachset
 {
 	node *head;
@@ -17,6 +25,7 @@ typedef struct reachset
 }
 reachset;
 
+// struct containing array of linked list for each level in levelset & its cardinalty //
 typedef struct levelSet
 {
 	dim numLevels;
@@ -24,6 +33,7 @@ typedef struct levelSet
 }
 levelSet;
 
+// arrays containitng visited status & depth of each node, crit path of DAG and reachset ptr //
 typedef struct Graph
 {
 	bool* visited;
@@ -32,6 +42,9 @@ typedef struct Graph
 	reachset reach;
 }
 Graph;
+
+
+// FUNCTIONS //
 
 node* createNode(dim v);
 Graph* createGraph(dim n);

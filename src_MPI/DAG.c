@@ -3,31 +3,34 @@
 #include "mmio.h"
 #include "DAG.h"
 
+// create a new node in reachset //
 node* createNode(dim v){
 	node* newNode = (node*)malloc(sizeof(node));
 	if(!newNode)
 		printf("Error creating node\n");
 		
-	newNode->vertex = v;
-	newNode->next = NULL;
+	newNode->vertex = v;	// vertex representing col number
+	newNode->next = NULL;	// vertex representing col number
 	newNode->prev = NULL;
 
 	return newNode;
 }
 
+// intialise graph to represent directed acyclic graph for the dependencies //
 Graph* createGraph(dim n){
 	Graph* graph = (Graph*)malloc(sizeof(Graph));
 	if(!graph)
 		printf("Error allocating DAG.\n");
 	
-	graph->depth = (dim*)calloc(n,sizeof(dim));
-	graph->visited = (bool*)calloc(n,sizeof(bool));
+	graph->depth = (dim*)calloc(n,sizeof(dim));	// array representing depth of each node in DAG
+	graph->visited = (bool*)calloc(n,sizeof(bool));	// boolean array representing if DFS has touched node or not
 	graph->reach.head = NULL;
-	graph->reach.tail = graph->reach.head;
-	graph->critPath = 0;
+	graph->reach.tail = graph->reach.head;		// start at tail, since DFS fn appends in reverse order
+	graph->critPath = 0;				// val for critical path of DAG
 	return graph;
 }
 
+// free all allocated memory from the DAG //
 void freeGraph(Graph* graph){
 	if(graph){
 		node* reachPtr = graph->reach.head;
@@ -42,6 +45,7 @@ void freeGraph(Graph* graph){
 	free(graph);
 }
 
+// free all allocated memory from the levelset //
 void freeLevelSet(levelSet* G){
 	dim i;
 	for(i=0;i<G->numLevels;i++){
@@ -84,18 +88,20 @@ void DFS(mat_mar* L, Graph* graph, dim vertex, dim count) {
 		if(graph->visited[L->I[i]] == 0){
 			DFS(L, graph, L->I[i], count);
 		}
-		if(graph->depth[L->I[i]] < count+1)
-			adjustDepth(L, graph, L->I[i], count);
+		if(graph->depth[L->I[i]] < count+1)	// if the depth of the child node < depth(parent)+1
+			adjustDepth(L, graph, L->I[i], count);	//recursively adjust depth, child may have initially taken shorted path
 	}
 	appendSet(&graph->reach, vertex);
 }
 
+// recursive function to get the depth of each node in the DAG //
 void adjustDepth(mat_mar* L, Graph* graph, dim vertex, dim count){
 	graph->depth[vertex] = count+1;
 	count++;
 	if(count > graph->critPath)
 		graph->critPath = count;
 	dim i;
+	// recursively checks if the next node in the path has a higher depth //
 	for(i = (L->J[vertex]+1); i < L->J[vertex+1]; i++){
 		if(graph->depth[L->I[i]] < count+1)
 			adjustDepth(L, graph, L->I[i], count);
@@ -112,7 +118,9 @@ Graph* getReach(mat_mar* L, mat_mar* b){
 	return graph;
 }
 
+// takes the already acquired topologically ordered reachset and breaks it up into levelsets //
 levelSet* assignLevelSet(Graph* graph){
+	// intialising vals
 	levelSet* G = (levelSet*)malloc(sizeof(levelSet));
 	G->numLevels = graph->critPath;
 	G->level_ptr = (reachset*)malloc(G->numLevels*sizeof(reachset));
@@ -123,6 +131,8 @@ levelSet* assignLevelSet(Graph* graph){
 		G->level_ptr[i].tail = G->level_ptr[i].head;
 		G->level_ptr[i].numElems = 0;
 	}
+	// increment through reachset //
+	// all nodes with equal depth put in same level //
 	while(tmp!=NULL){
 		dim set = graph->depth[tmp->vertex];
 		appendSet(&G->level_ptr[set-1], tmp->vertex);
