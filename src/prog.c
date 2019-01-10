@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <getopt.h>
 #include <math.h>
 #include "mm.h"
 #include "DAG.h"
@@ -9,22 +10,27 @@
 #define err 1E-15
 
 int main(int argc, char* argv[]){
-	//char* fileA = "../torso1/torso1.mtx";
-	//char* fileb = "../torso1/b_for_torso1.mtx";
-	//char* fileA = "../TSOPF_RS_b678_c2/TSOPF_RS_b678_c2.mtx";
-	//char* fileb = "../TSOPF_RS_b678_c2/b_for_TSOPF_RS_b678_c2_b.mtx";
-	//char* fileA = "../af_0_k101/af_0_k101.mtx";
-	//char* fileb = "../af_0_k101/b_sparse_af_0_k101.mtx";
-	//char* fileb = "../af_0_k101/b_dense_af_0_k101.mtx";
-	char* fileA = "../test_L.mtx";
-	char* fileb = "../test_b.mtx";
-	
 	mat_mar A, b, L;
 	real *x,*y;
 	dim i;
 	real SSE = 0;
 	clock_t start, end;
 	double time_taken;
+	char* fileA;
+	char* fileb;
+	int option = 0;
+
+	while ((option = getopt(argc, argv,"L:b:")) != -1) {
+    	switch (option) {
+        	case 'L' : fileA = optarg;
+    		    break;
+        	case 'b' : fileb = optarg;
+            	break;
+			default:
+      			printf("Option incorrect\n");
+      			return 1;
+		}
+	}
 
 	A = init_mat(fileA);
 	b = init_mat(fileb);

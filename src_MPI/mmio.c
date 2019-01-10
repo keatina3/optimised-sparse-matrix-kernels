@@ -202,7 +202,7 @@ bool writeCCS(mat_mar* A, char* filename){
 	    	fprintf(A->file, "%lu %lu\n", 1+A->I[i], A->J[i]);
 	} else if (is_real(A->head)){
      	for (i=0; i<A->nz; i++){
-    	   	fprintf(A->file, "%lu %lu %20.16g\n", 1+A->I[i], 1, A->dat[i]);
+    	   	fprintf(A->file, "%lu %u %20.16g\n", 1+A->I[i], 1, A->dat[i]);
 		}
     } else if (is_complex(A->head)){
         for (i=0; i<A->nz; i++)
