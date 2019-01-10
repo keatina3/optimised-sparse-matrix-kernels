@@ -4,12 +4,12 @@
 #include <math.h>
 #include <getopt.h>
 #include <time.h>
-#include "mm.h"
+#include "mmio.h"
 #include "DAG.h"
 #include "routines.h"
 #include "utils.h"
 
-#define err 1E-15
+#define err 1E-10
 
 int compare (const void * a, const void * b) {return ( *(int*)a - *(int*)b );}
 
@@ -64,17 +64,17 @@ int main(int argc, char* argv[]){
 	x = lsolve_Par(&L, &b, G, myid, nprocs, root, MPI_COMM_WORLD);
 	end = clock();
 	time_taken = ((double)(end-start))/CLOCKS_PER_SEC;
+	printf("Time taken: %lf, Nprocs = %d\n",time_taken,nprocs);
 
 	// VERIFICATION //
 
 	SSE = 0;
 	if(myid==root){
-		
 		y = lsolve(&L, &b);
 		for(i=0;i<b.m;i++){
 			SSE += (x[i]-y[i])*(x[i]-y[i]); 
-			//if(fabs(x[i]-y[i]) > err)
-			//	printf("x[i] = %0.16lf, y[i] = %0.16lf,col = %ld\n",x[i],y[i],i);
+			if(fabs(x[i]-y[i]) > err)
+				printf("x[%lu] = %0.16lf, y[%lu] = %0.16lf\n",i,x[i],i,y[i]);
 		}
 		printf("SSE = %0.16lf\n",SSE);
 		
@@ -89,13 +89,15 @@ int main(int argc, char* argv[]){
 				tmp = tmp->prev;
 				i++;
 		}
-		qsort (nzInd, DG->reach.numElems, sizeof(dim), compare);
+		qsort(nzInd, DG->reach.numElems, sizeof(dim), compare);
 		mat_mar xMM = ArrtoCCS(x,nzInd,b.m,DG->reach.numElems);
 		free(nzInd);
 		writeMM(&xMM,"x.mtx");
 
 	// FREE DATA //
-
+		
+		free(x);
+		free(y);
 		free_mat(&A);
 		free_mat(&xMM);
 		freeGraph(DG);

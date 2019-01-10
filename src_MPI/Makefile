@@ -19,16 +19,18 @@ filebD = "../af_0_k101/b_dense_af_0_k101.mtx"
 
 objects = mmio.o DAG.o prog.o utils.o routines.o
 
+nprocs = 4
+
 prog: $(objects)
 	$(CC) $(LDFLAGS) $(objects) -o $@
 
 test: testSparse testDense
 
 testSparse: prog
-	mpiexec --oversubscribe -n 4 ./prog -L $(fileA) -b $(fileb)
+	mpiexec --oversubscribe -n $(nprocs) ./prog -L $(fileA) -b $(fileb)
 	
 testDense: prog
-	mpiexec --oversubscribe -n 4 ./prog -L $(fileA) -b $(filebD)
+	mpiexec --oversubscribe -n $(nprocs) ./prog -L $(fileA) -b $(filebD)
 
 .PHONY: clean test
 clean:

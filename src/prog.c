@@ -3,12 +3,13 @@
 #include <time.h>
 #include <getopt.h>
 #include <math.h>
-#include "mm.h"
+#include "mmio.h"
 #include "DAG.h"
 #include "routines.h"
 
 #define err 1E-15
 
+int compare (const void * a, const void * b){return ( *(int*)a - *(int*)b);}
 int main(int argc, char* argv[]){
 	mat_mar A, b, L;
 	real *x,*y;
@@ -31,6 +32,8 @@ int main(int argc, char* argv[]){
       			return 1;
 		}
 	}
+
+	// READING IN DATA //
 
 	A = init_mat(fileA);
 	b = init_mat(fileb);
@@ -59,10 +62,24 @@ int main(int argc, char* argv[]){
 	for(i=0;i<L.m;i++){
 		SSE += (y[i]-x[i])*(y[i]-x[i]); 
 		if(fabs(y[i]-x[i]) > err)
-			printf("y[i] = %0.16lf, x[i] = %0.16lf\n",y[i],x[i]);	
+			printf("x[%lu] = %0.16lf, y[%lu] = %0.16lf\n",i,x[i],i,x[i]);	
 	}
 	printf("SSE = %0.16lf\n",SSE);
 	
+	// OUTPUTTING RESULTS //
+
+	dim* nzInd = (dim*)malloc(DG->reach.numElems*sizeof(dim));
+	node* tmp = DG-> reach.tail;
+	i=0;
+	while(tmp!=NULL){
+		nzInd[i] = tmp->vertex;
+		tmp = tmp->prev;
+		i++;
+	}
+	qsort(nzInd, DG->reach.numElems, sizeof(dim), compare);
+	mat_mar xMM = ArrtoCCS(y,nzInd,b.m,DG->reach.numElems);
+	free(nzInd);
+	writeMM(&xMM,"x.mtx");
 
 	// FREE DATA //
 
@@ -70,7 +87,9 @@ int main(int argc, char* argv[]){
 	free_mat(&A);
 	free_mat(&b);
 	free_mat(&L);
+	free_mat(&xMM);
 	free(x);
+	free(y);
 
 	return 0;
 }

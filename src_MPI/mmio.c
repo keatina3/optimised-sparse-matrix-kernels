@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "mm.h"
+#include "mmio.h"
 
 bool read_mm_head(mat_mar* A){
 	char buffer[MM_MAX_LINE_LENGTH];
@@ -174,7 +174,7 @@ bool writeMM(mat_mar* A, char* filename){
 	else
 		printf("Writing dense format not complete\n");
 	
-	printf("Succesfull writing to file.\n");
+	printf("Succesful writing to file.\n");
 	printf("Matrix type: %c%c%c%c\n",A->head[0],A->head[1],A->head[2],A->head[3]);
 	printf("Dimensions: %lu, %lu\n",A->m,A->n);
 	printf("Non-zero elements: %lu\n\n\n",A->nz);
