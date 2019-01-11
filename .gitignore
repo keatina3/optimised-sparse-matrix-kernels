@@ -3,4 +3,5 @@
 *.swp
 *.o
 src2/
+*.tar.gz
 prog
